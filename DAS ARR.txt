@@ -1,0 +1,5 @@
+5
+0
+
+First line is DAS. Number of frames at 30FPS before arr kicks in
+Second line is ARR. Number of frames at 30FPS before the block shifts over. -1 is instant, 0 is every frame, 1 is every second frame, etc.
