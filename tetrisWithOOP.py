@@ -257,6 +257,7 @@ class playfield:
         
                 if not self.hold:
                     self.pieces_placed += 1
+                    self.test_if_spin()
                     
                     self.place_piece()
                     blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
@@ -423,6 +424,32 @@ class playfield:
         pygame.quit()
         sys.exit()
 
+    def test_if_spin(self):
+        _tet = self.cur_tetromino.type
+        _pos = self.cur_tetromino.pos
+        corners = 0
+        mobile = False
+
+        if _tet == 't':
+            for x in [0, 2]:
+                for y in [0, 2]:
+                    _x = _pos[0] + x
+                    _y = _pos[1] + y
+                    if _x > 9 or _x < 0 or _y > 19:
+                        corners += 1
+                    elif self.field[_x][_y]:
+                        corners += 1
+            if corners >= 3:
+                for i in [-1, 1]:
+                    if self.test_array(offset=[0, i]) or self.test_array(offset=[i, 0]): 
+                        mobile = True
+                        break
+
+                if not mobile:
+                    print('T-spin')
+                    return True
+        return False
+        
 def load_tile_line(filename, tile_length):
     image = pygame.image.load(filename).convert()
     image_width = image.get_size()[0]
