@@ -523,3 +523,75 @@ def game_intro():
     screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
 
 if __name__=='__main__':
+    pygame.init()
+    seed(a = None, version = 2)
+    helvetica = pygame.font.SysFont('Helvetica', 40)
+    
+
+
+    screen_width = 32 * 16
+    screen_height = 32 * 20
+    screen = pygame.display.set_mode((screen_width, screen_height))
+
+    tet_table = load_tile_line("blocks32.png", 32)
+    tet_table.append(pygame.image.load("black.png").convert())
+    ghost_tet_table = load_tile_line("ghostblocks32.png", 32)
+    prev_tet_table = load_tile_line("prev_blocks16.png", 64)
+
+    tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
+    f = open("controls.txt", 'r')
+    buttons = []
+    for n in range(0, 8):
+        buttons.append(f.readline()[0])
+
+    frame = 0
+    field = playfield([32 * 2, 0])
+    field.blit_previews()
+    game_intro()
+    field.new_piece()
+    game_start_time = time()
+    while True:
+        start = time()
+        
+        presses = test_for_presses()
+        if buttons[7] in presses and time() - game_start_time > 1: #reset
+            frame = 0
+            screen.fill((0, 0, 0))
+            field = playfield([32 * 2, 0])
+            field.blit_previews()
+            game_intro()
+            field.new_piece()
+            game_start_time = time()
+            start = time()
+
+        field.advance_frame(presses)
+
+        #Pieces per second display
+        if frame % 30 == 0:
+            screen.fill((0, 0, 0), (32 * 14, 0, 6 * 32, 2 * 32))
+            screen.blit(helvetica.render(str(round(field.pieces_placed / (time() - game_start_time+0.001), 2)), False, (150, 150, 150)), (32 * 14, 0))
+
+
+        pygame.display.flip()
+        pygame.event.pump()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        if field.lines_left <= 0:
+            break
+
+        frame += 1
+        sleep(max(0, 0.03333333333 - (time() - start)))
+
+    screen.fill((0, 0, 0))
+    screen.blit(helvetica.render(str(round(field.finish_time - game_start_time, 4)), True, (150, 150, 150)), (32 * 6, 32 * 9))
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        sleep(.5)
