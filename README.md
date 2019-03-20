@@ -1,2 +1,2 @@
 # Pytet
-Moden tetris written in python 3.
+Modern Tetris written in python 3.
