@@ -286,7 +286,7 @@ class PlayField:
                 self.hold = False
 
             if not self.test_array():
-                self.quit_game()  # end by spawn overlap
+                quit_game()  # end by spawn overlap
 
     def reblit_field(self):
         screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
@@ -340,7 +340,7 @@ class PlayField:
                             self.cur_tetromino.type) + 1
                         blocks -= 1
         if blocks == 0:  # placing all blocks in the overflow is an end condition
-            self.quit_game()
+            quit_game()
 
     def new_piece(self):
         self.cur_tetromino = Tetromino(self.next_pieces.pop(0))
@@ -436,11 +436,6 @@ class PlayField:
                 smallest_distance = index
 
         return [coordinates[0], coordinates[1] + smallest_distance]
-
-    @staticmethod
-    def quit_game():
-        pygame.quit()
-        sys.exit()
 
     def test_if_spin(self):
         _tet = self.cur_tetromino.type
@@ -542,6 +537,11 @@ def game_intro():
 def blit_stats_constants():
     screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
     screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
+
+
+def quit_game():
+    pygame.quit()
+    sys.exit()
 
 
 def play_game():
