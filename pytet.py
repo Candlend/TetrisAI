@@ -604,7 +604,7 @@ if __name__=='__main__':
     f = open("settings/controls.txt", 'r')
     buttons = []
     for n in range(0, 8):
-        buttons.append(f.readline()[0])
+        buttons.append(f.readline().split()[0])
 
     while True:
         play_game()

@@ -1,11 +1,8 @@
-a - rotate left
-s - hold
-d - rotate right
-i - soft drop
-j - move left
-k - hard drop
-l  - move left
-r - reset
-
-CURRENTLY ONLY LETTERS AND POSSIBLY NUMBERS AND SYMBOLS ARE SUPPORTED
-That means you can't use space, ctrl, end, arrow keys, etc.
+z - rotate left
+shift - hold
+x - rotate right
+down - soft drop
+left - move left
+space - hard drop
+right  - move right
+f5 - reset
