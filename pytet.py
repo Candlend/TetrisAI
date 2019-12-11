@@ -9,7 +9,7 @@ from keyboard import is_pressed
 # 0, 0 is TOP LEFT FOR BLITTING - REMEMBER
 # piece order - 0S, 1Z, 2J, 3L, 4T, 5O, 6I, 7Garbage
 
-class tetromino:
+class Tetromino:
     def __init__(self, tet_type):
         self.type = tet_type
         self.grid, self.pos = self.spawn_tet()
@@ -91,7 +91,7 @@ class tetromino:
         self.grid = [x[:] for x in new_grid]
 
 
-class playfield:
+class PlayField:
     def __init__(self, position):  # position is top left of field - DOES NOT INCLUDE BORDER
         self.position = position  # [64, 0] for now
         self.left_border = 32 * 2
@@ -113,7 +113,7 @@ class playfield:
         self.das_timer = self.das
         self.arr_timer = 0
         self.soft_drop_timer = 0  # start soft immediately when pressed
-        self.fall_delay_timer = 0  # immediatly drop a space when initiated
+        self.fall_delay_timer = 0  # immediately drop a space when initiated
         self.above_block_timer = self.block_delay
 
         self.hold = False
@@ -125,6 +125,8 @@ class playfield:
         self.next_pieces = []
         self.next_pieces.extend(make_bag())
         self.next_pieces.extend(make_bag())
+
+        self.cur_tetromino = None
 
         self.pieces_placed = 0
 
@@ -283,7 +285,8 @@ class playfield:
             else:
                 self.hold = False
 
-            if not self.test_array(): self.end_game()  # end by spawn overlap
+            if not self.test_array():
+                self.quit_game()  # end by spawn overlap
 
     def reblit_field(self):
         screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
@@ -302,19 +305,19 @@ class playfield:
                 for x in range(10):
                     line.append(self.field[x][y + coordinates[1]])
                 if 0 not in line:
-                    for n in range(10):
-                        self.field[n].pop(y + coordinates[1])
-                        self.field[n].insert(0, self.overflow_field[n].pop(19))
-                        self.overflow_field[n].insert(0, 0)
+                    for i in range(10):
+                        self.field[i].pop(y + coordinates[1])
+                        self.field[i].insert(0, self.overflow_field[i].pop(19))
+                        self.overflow_field[i].insert(0, 0)
                     removed_lines = True
                     screen.fill((0, 0, 0), (32 * 14, self.lines_left_pos_y, 6 * 32, 2 * 32))
             elif 0 > y + coordinates[1]:
                 for x in range(10):
                     line.append(self.overflow_field[x][y + coordinates[1] + 20])
                 if 0 not in line:
-                    for n in range(10):
-                        self.overflow_field[n].pop(y + coordinates[1] + 20)
-                        self.overflow_field[n].insert(0, 0)  # rewrite
+                    for i in range(10):
+                        self.overflow_field[i].pop(y + coordinates[1] + 20)
+                        self.overflow_field[i].insert(0, 0)  # rewrite
                     removed_lines = True
                     screen.fill((0, 0, 0), (32 * 14, self.lines_left_pos_y, 6 * 32, 2 * 32))
         return removed_lines
@@ -337,10 +340,10 @@ class playfield:
                             self.cur_tetromino.type) + 1
                         blocks -= 1
         if blocks == 0:  # placing all blocks in the overflow is an end condition
-            self.end_game()
+            self.quit_game()
 
     def new_piece(self):
-        self.cur_tetromino = tetromino(self.next_pieces.pop(0))
+        self.cur_tetromino = Tetromino(self.next_pieces.pop(0))
         if len(self.next_pieces) == 7:
             self.next_pieces.extend(make_bag())
 
@@ -419,8 +422,7 @@ class playfield:
         length = self.cur_tetromino.length
         blocks = []
         smallest_distance = 99
-        index = 0
-        for x in range(length):  # get indexes (indexi?) of all blocks
+        for x in range(length):  # get indexes of all blocks
             for y in range(length):
                 if grid[x][y] > 0:
                     blocks.append([x + coordinates[0], y + coordinates[1]])
@@ -435,7 +437,8 @@ class playfield:
 
         return [coordinates[0], coordinates[1] + smallest_distance]
 
-    def end_game(self):
+    @staticmethod
+    def quit_game():
         pygame.quit()
         sys.exit()
 
@@ -518,8 +521,8 @@ def test_for_presses():
 
 
 def first_non_zero(my_list):
-    for i, n in enumerate(my_list):
-        if n != 0:
+    for i, j in enumerate(my_list):
+        if j != 0:
             return i
     return None
 
@@ -545,7 +548,7 @@ def play_game():
     screen.fill((0, 0, 0))
     pygame.display.flip()
     frame = 0
-    field = playfield([32 * 2, 0])
+    field = PlayField([32 * 2, 0])
     field.blit_previews()
     blit_stats_constants()
     game_intro()
@@ -558,7 +561,7 @@ def play_game():
         if buttons[7] in presses and time() - game_start_time > 0.1:  # reset
             frame = 0
             screen.fill((0, 0, 0))
-            field = playfield([32 * 2, 0])
+            field = PlayField([32 * 2, 0])
             field.blit_previews()
             blit_stats_constants()
             game_intro()
@@ -586,7 +589,7 @@ def play_game():
                 sys.exit()
 
         frame += 1
-        sleep(max(0, 0.03333333333 - (time() - start)))
+        sleep(max(0.0, 0.03333333333 - (time() - start)))
 
 
 if __name__ == '__main__':
