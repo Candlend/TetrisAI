@@ -96,7 +96,7 @@ class PlayField:
         self.position = position  # [64, 0] for now
         self.left_border = 32 * 2
         self.right_border = 32 * 2
-        self.lines_left_pos_y = 32 * 4
+        self.score_pos_y = 32 * 4
         self.field = [[0 for _ in range(20)] for _ in range(10)]
         self.overflow_field = [[0 for _ in range(20)] for _ in range(10)]
 
@@ -129,9 +129,11 @@ class PlayField:
         self.cur_tetromino = None
 
         self.pieces_placed = 0
+        self.total_score = 0
 
         screen.fill((60, 60, 60), (position[0] - self.left_border, position[1], self.left_border, 32 * 20))
         screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
+        self.update_score()
 
     def advance_frame(self, presses):
         if self.cur_tetromino.ghost_pos != [None, None]:
@@ -310,7 +312,7 @@ class PlayField:
                         self.field[i].insert(0, self.overflow_field[i].pop(19))
                         self.overflow_field[i].insert(0, 0)
                     removed_lines = True
-                    screen.fill((0, 0, 0), (32 * 14, self.lines_left_pos_y, 6 * 32, 2 * 32))
+                    self.update_score(10)
             elif 0 > y + coordinates[1]:
                 for x in range(10):
                     line.append(self.overflow_field[x][y + coordinates[1] + 20])
@@ -319,8 +321,13 @@ class PlayField:
                         self.overflow_field[i].pop(y + coordinates[1] + 20)
                         self.overflow_field[i].insert(0, 0)  # rewrite
                     removed_lines = True
-                    screen.fill((0, 0, 0), (32 * 14, self.lines_left_pos_y, 6 * 32, 2 * 32))
+                    self.update_score(10)
         return removed_lines
+
+    def update_score(self, score=0):
+        self.total_score += score
+        screen.fill((0, 0, 0), (32 * 14, self.score_pos_y, 6 * 32, 2 * 32))
+        screen.blit(helvetica_big.render(str(self.total_score), False, (150, 150, 150)), (32 * 14, self.score_pos_y))
 
     def place_piece(self):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
         grid = self.cur_tetromino.grid
