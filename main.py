@@ -1,6 +1,6 @@
 import sys
 import os
-from random import shuffle, seed
+from random import shuffle, seed, random, randint
 from time import sleep, time
 import pygame
 from keyboard import is_pressed
@@ -18,6 +18,7 @@ class PlayField:
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
+        self.garbage_probs = [0.01, 0.01, 0.01, 0.001, 0.001]
         if grid is None:
             self.field = [[0 for _ in range(20)] for _ in range(10)]
         else:
@@ -227,7 +228,7 @@ class PlayField:
             self.hold_tet = self.cur_tetromino.type
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
-
+        self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
         self.cur_tetromino.set_direction(action.direction)
         self.cur_tetromino.pos = action.pos
@@ -262,8 +263,8 @@ class PlayField:
                     line.append(self.field[x][y + coordinates[1]])
                 if 0 not in line:
                     for i in range(10):
-                        self.field[i].pop(y + coordinates[1])
-                        self.field[i].insert(0, self.overflow_field[i].pop(19))
+                        self.field[i] = np.delete(self.field[i], y + coordinates[1])
+                        self.field[i] = np.insert(self.field[i], 0, self.overflow_field[i].pop(19))
                         self.overflow_field[i].insert(0, 0)
                     removed_lines = True
                     self.update_score(10)
@@ -425,7 +426,36 @@ class PlayField:
         return False
 
     def add_garbage(self, num_lines):
-        pass
+        garbage = [tetrominoes.index("garbage") + 1 for _ in range(10)]
+        garbage[randint(0, 9)] = 0
+        garbages = np.array([garbage for _ in range(num_lines)])
+        self.field = np.delete(self.field, range(num_lines - 1), axis=1)
+        self.field = np.column_stack((self.field, garbages.T))
+        self.reblit_field()
+
+    def rand_add_garbage(self):
+        probs = self.garbage_probs
+        p = random()
+        tmp = 1 - probs[0]
+        if p > tmp:
+            self.add_garbage(1)
+            return
+        tmp -= probs[1]
+        if p > tmp:
+            self.add_garbage(2)
+            return
+        tmp -= probs[2]
+        if p > tmp:
+            self.add_garbage(4)
+            return
+        tmp -= probs[3]
+        if p > tmp:
+            self.add_garbage(6)
+            return
+        tmp -= probs[4]
+        if p > tmp:
+            self.add_garbage(8)
+            return
 
 
 def load_tile_line(filename, tile_length):
@@ -569,9 +599,9 @@ def play_auto():
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 
     next_pieces = ['s', 'z', 'j', 'l', 't', 'o', 'i', 's', 'z', 'j', 'l', 't', 'o', 'i']
@@ -604,7 +634,7 @@ def play_auto():
                 pygame.quit()
                 sys.exit()
         seconds += 1
-        sleep(1)
+        sleep(0.3)
 
 
 if __name__ == '__main__':
@@ -628,4 +658,5 @@ if __name__ == '__main__':
     for n in range(0, 8):
         buttons.append(f.readline().split()[0])
 
+    # play_game()
     play_auto()
