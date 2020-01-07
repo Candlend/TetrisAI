@@ -50,6 +50,7 @@ class PlayField:
 
         self.pieces_placed = 0
         self.total_score = 0
+        self.combo = 0
 
         screen.fill((60, 60, 60), (position[0] - self.left_border, position[1], self.left_border, 32 * 20))
         screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
@@ -182,7 +183,7 @@ class PlayField:
 
             if not self.hold:
                 self.pieces_placed += 1
-                self.test_if_spin()
+                ### self.test_if_spin()
 
                 self.place_piece()
                 blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
@@ -221,7 +222,7 @@ class PlayField:
 
         self.cur_tetromino = Tetromino(action.tet_type)
         self.cur_tetromino.set_direction(action.direction)
-        self.cur_tetromino.pos = action.pos
+        self.cur_tetromino.pos = action.pos  #ToDo
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
 
         self.place_piece()
@@ -229,6 +230,7 @@ class PlayField:
 
         if self.clear_lines(self.cur_tetromino.ghost_pos):
             self.reblit_field()
+            
 
         self.new_piece()
 
@@ -244,7 +246,7 @@ class PlayField:
 
     def clear_lines(self, coordinates):
         length = self.cur_tetromino.length
-        removed_lines = False
+        removed_lines = 0
 
         for y in range(length):
             line = []
@@ -256,8 +258,7 @@ class PlayField:
                         self.field[i].pop(y + coordinates[1])
                         self.field[i].insert(0, self.overflow_field[i].pop(19))
                         self.overflow_field[i].insert(0, 0)
-                    removed_lines = True
-                    self.update_score(10)
+                    removed_lines += 1
             elif 0 > y + coordinates[1]:
                 for x in range(10):
                     line.append(self.overflow_field[x][y + coordinates[1] + 20])
@@ -265,8 +266,23 @@ class PlayField:
                     for i in range(10):
                         self.overflow_field[i].pop(y + coordinates[1] + 20)
                         self.overflow_field[i].insert(0, 0)  # rewrite
-                    removed_lines = True
-                    self.update_score(10)
+                    removed_lines += 1
+
+        if removed_lines:
+            score = 2 ** (removed_lines - 1) * 10
+            if self.test_if_spin():
+                score *= 2
+            score *= (1 + self.combo * 0.1)
+            self.update_score(score)
+            print("score: ", score)
+            self.combo += 1
+        else:
+            self.combo = 0
+        print("pos: ", self.cur_tetromino.pos)
+        print("combo: ", self.combo)
+        print("=============")
+
+        
         return removed_lines
 
     def update_score(self, score=0):
@@ -594,4 +610,5 @@ if __name__ == '__main__':
     for n in range(0, 8):
         buttons.append(f.readline().split()[0])
 
-    play_auto()
+    # play_auto()
+    play_game()
