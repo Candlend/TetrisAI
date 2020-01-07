@@ -228,7 +228,7 @@ class PlayField:
             self.hold_tet = self.cur_tetromino.type
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
-        self.rand_add_garbage()
+        # self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
         self.cur_tetromino.set_direction(action.direction)
         self.cur_tetromino.pos = action.pos
@@ -286,7 +286,7 @@ class PlayField:
 
     def place_piece(self):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
         grid = self.cur_tetromino.grid
-        coordinates = self.cur_tetromino.ghost_pos
+        coordinates = self.cur_tetromino.pos
         length = self.cur_tetromino.length
         blocks = 0
 

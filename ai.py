@@ -102,9 +102,9 @@ class TetrisAgent:
         for i in range(tetromino.size):
             for j in range(tetromino.size):
                 # print(x,y,i,j)
-                if tetromino.grid[i][j] == 1 and (y + j >= 20
+                if tetromino.grid[i][j] > 0 and (y + j >= 20
                  or x + i >= 10 or x + i < 0
-                 or state.grid[x + i][y + j] == 1):
+                 or state.grid[x + i][y + j] > 0):
                     return True
         return False
 
@@ -125,7 +125,7 @@ class TetrisAgent:
             x, y = cur.get_pos()
             for i in range(cur.size):
                 for j in range(cur.size):
-                    if cur.grid[i][j] == 1 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] == 1): 
+                    if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
                         # there is brick just under the current tetromino
                         action = Action(cur.type, cur.pos, cur.rotation)
                         res.append(action)
