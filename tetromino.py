@@ -1,3 +1,5 @@
+import util
+
 class Tetromino:
     def __init__(self, tet_type):
         self.type = tet_type
@@ -5,6 +7,7 @@ class Tetromino:
         self.length = len(self.grid)
         self.rotation = 0  # 0 is default, 1 is right, 2 is double, 3 is left
         self.ghost_pos = [0, 0]
+        self.moving = util.Queue()
 
     def spawn_tet(self):
         _tet = self.type
