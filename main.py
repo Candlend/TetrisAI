@@ -229,7 +229,7 @@ class PlayField:
             self.hold_tet = self.cur_tetromino.type
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
-        self.rand_add_garbage()
+        # self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
         self.cur_tetromino.set_direction(action.direction)
         self.cur_tetromino.pos = action.pos  #ToDo
@@ -268,8 +268,8 @@ class PlayField:
                     line.append(self.field[x][y + coordinates[1]])
                 if 0 not in line:
                     for i in range(10):
-                        self.field[i] = np.delete(self.field[i], y + coordinates[1])
-                        self.field[i] = np.insert(self.field[i], 0, self.overflow_field[i].pop(19))
+                        temp = np.delete(self.field[i], y + coordinates[1])
+                        self.field[i] = np.insert(temp, 0, self.overflow_field[i].pop(19))
                         self.overflow_field[i].insert(0, 0)
                     removed_lines += 1
             elif 0 > y + coordinates[1]:
@@ -307,7 +307,7 @@ class PlayField:
         tspin = self.test_if_spin()
         
         grid = self.cur_tetromino.grid
-        coordinates = self.cur_tetromino.ghost_pos
+        coordinates = self.cur_tetromino.pos
         length = self.cur_tetromino.length
         blocks = 0
 
@@ -562,10 +562,35 @@ def quit_game():
 
 
 def play_game():
+    grid = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 1, 1, 1, 1, 1],
+        [1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+    ]
+
+    next_pieces = ['t', 'z', 'j', 'l', 't', 'o', 'i', 's', 'z', 'j', 'l', 't', 'o', 'i']
+
     screen.fill((0, 0, 0))
     pygame.display.flip()
     frame = 0
-    field = PlayField([32 * 2, 0], None, None)
+    field = PlayField([32 * 2, 0], grid, next_pieces)
     field.blit_previews()
     blit_stats_constants()
     game_intro()
@@ -578,7 +603,7 @@ def play_game():
         if buttons[7] in presses and time() - game_start_time > 0.1:  # reset
             frame = 0
             screen.fill((0, 0, 0))
-            field = PlayField([32 * 2, 0])
+            field = PlayField([32 * 2, 0], None, None)
             field.blit_previews()
             blit_stats_constants()
             game_intro()

@@ -1,3 +1,4 @@
 misamino/tetris_ai/Release
 misamino/tetris_ai/tetris_ai.vcxproj
 *.pyc
+__pycache__/

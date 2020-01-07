@@ -4,10 +4,17 @@ import pygame
 import copy
 
 class Action:
-    def __init__(self, tet_type, pos, direction):
+    def __init__(self, tet_type, pos, rotation):
         self.tet_type = tet_type
         self.pos = pos
-        self.direction = direction
+        if rotation == 0:
+            self.direction = 'up'
+        elif rotation == 1:
+            self.direction = 'right'
+        elif rotation == 2:
+            self.direction = 'double'
+        elif rotation == 3:
+            self.direction = 'left'
         self.grid = None  # TODO
 
 
@@ -37,13 +44,21 @@ class TetrisAgent:
         self.discount = 0.5
         self.QValues = util.Counter()
         self.weights = util.Counter()
-        self.feats = util.Counter()
 
     def get_weights(self):
         return self.weights
 
     def get_features(self, state, action):
-        return self.feats
+        feats = util.Counter()
+        landingHeight = action.pos[0]   # Height where the last piece is added, Prevents from increasing the pile height
+        # erodedPieceCells              # (Number of rows eliminated in the last move) × (Number of bricks eliminated from the last piece added), Encourages to complete rows
+        rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
+        columnTransitions = 0           # Same thing for vertical transitions
+        Holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
+        # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+
+
+        return feats
 
     def get_q_value(self, state, action):
         sum_value = 0
@@ -91,35 +106,43 @@ class TetrisAgent:
         return action
     # Judge if the block has collision to now grid or out of the edge.
     def is_colli(self, tetromino, state):
-        pass
+        x, y = tetromino.get_pos()
+        for i in range(tetromino.size):
+            for j in range(tetromino.size):
+                # print(x,y,i,j)
+                if tetromino.grid[i][j] > 0 and (y + j >= 20
+                 or x + i >= 10 or x + i < 0
+                 or state.grid[x + i][y + j] > 0):
+                    return True
+        return False
 
     def get_legal_actions(self, state):
-        actions = ['up', 'down', 'left', 'right']
+        actions = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
         tet = state.cur_tetromino
         _tet = tet.type
         _pos = None
         grid = None
         grid, _pos = tet.spawn_tet()
-        q = MovingQueue()
+        q = util.Queue()
+        close_set = [[[False for ___ in range(4)] for __ in range(20)] for _ in range(10)]
         q.push(tet)
+        close_set[_pos[0]][_pos[1]][tet.rotation] = True
         res = []
-        while not q.isEmpty:
+        while not q.isEmpty():
             cur = q.pop()
-            
+            x, y = cur.get_pos()
+            for i in range(cur.size):
+                for j in range(cur.size):
+                    if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
+                        # there is brick just under the current tetromino
+                        action = Action(cur.type, cur.pos, cur.rotation)
+                        res.append(action)
+            # expend new node
+            for action in actions:
+                tmp = copy.deepcopy(cur)
+                tmp.take_action(action)
+                tmp_x, tmp_y = tmp.get_pos()
+                if not self.is_colli(tmp, state) and not close_set[tmp_x][tmp_y][tmp.rotation]:
+                    q.push(tmp)
+                    close_set[tmp_x][tmp_y][tmp.rotation] = True
         return res
-
-class MovingQueue(util.Queue):
-    # Judge two blocks if they have collision
-    def is_colli(self, a, b):
-        pass
-
-    def push(self, item):
-        for i in self.list:
-            if self.is_colli(i, item):
-                return
-        tmp = None
-        tmp = copy.deepcopy(item)
-        self.list.insert(0, tmp)
-
-    def copy(self, q):
-        q.list = list(self.list)
