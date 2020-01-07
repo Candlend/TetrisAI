@@ -91,35 +91,41 @@ class TetrisAgent:
         return action
     # Judge if the block has collision to now grid or out of the edge.
     def is_colli(self, tetromino, state):
-        pass
+        x, y = tetromino.get_pos()
+        for i in range(tetromino.size):
+            for j in range(tetromino.size):
+                if tetromino.grid[i][j] == 1 and (state.grid[x + i][y + j] == 1
+                 or x + i > 10 or x + i < 0
+                 or y + j > 20):
+                    return True
+        return False
 
     def get_legal_actions(self, state):
-        actions = ['up', 'down', 'left', 'right']
+        actions = [0, 1, 2, 3, 4]  # fall left right rl rr
         tet = state.cur_tetromino
         _tet = tet.type
         _pos = None
         grid = None
         grid, _pos = tet.spawn_tet()
-        q = MovingQueue()
+        q = util.Queue()
+        close_set = [[[False for ___ in range(4)] for __ in range(20)] for _ in range(10)]
         q.push(tet)
+        close_set[_pos[0]][_pos[1]][tet.rotation] = True
         res = []
         while not q.isEmpty:
             cur = q.pop()
-            
+            x, y = cur.get_pos()
+            for i in range(cur.size):
+                for j in range(cur.size):
+                    if cur.grid[i][j] == 1 and state.field.gird([i + x + 1][j] == 1): 
+                        # there is brick just under the current tetromino
+                        res.append(cur)
+            # expend new node
+            for action in actions:
+                tmp = copy.deepcopy(cur)
+                tmp.take_action(action)
+                tmp_x, tmp_y = tmp.get_pos()
+                if not self.is_colli(tmp, state) and not close_set[tmp_x][tmp_y][tmp.rotation]:
+                    q.push(tmp)
+                    close_set[tmp_x][tmp_y][tmp.rotation] = True
         return res
-
-class MovingQueue(util.Queue):
-    # Judge two blocks if they have collision
-    def is_colli(self, a, b):
-        pass
-
-    def push(self, item):
-        for i in self.list:
-            if self.is_colli(i, item):
-                return
-        tmp = None
-        tmp = copy.deepcopy(item)
-        self.list.insert(0, tmp)
-
-    def copy(self, q):
-        q.list = list(self.list)
