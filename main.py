@@ -509,7 +509,7 @@ def play_game():
     screen.fill((0, 0, 0))
     pygame.display.flip()
     frame = 0
-    field = PlayField([32 * 2, 0])
+    field = PlayField([32 * 2, 0], None, None)
     field.blit_previews()
     blit_stats_constants()
     game_intro()
