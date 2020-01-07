@@ -124,11 +124,17 @@ class TetrisAgent:
             cur = q.pop()
             x, y = cur.get_pos()
             for i in range(cur.size):
+                flag = False
                 for j in range(cur.size):
                     if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
                         # there is brick just under the current tetromino
                         action = Action(cur.type, cur.pos, cur.rotation)
                         res.append(action)
+                        flag = True
+                        break
+                if flag:
+                    break
+
             # expend new node
             for action in actions:
                 tmp = copy.deepcopy(cur)
