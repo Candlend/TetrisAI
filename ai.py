@@ -109,7 +109,7 @@ class TetrisAgent:
         return False
 
     def get_legal_actions(self, state):
-        actions = [0, 1, 2, 3, 4]  # fall left right rl rr
+        actions = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
         tet = state.cur_tetromino
         _tet = tet.type
         _pos = None
@@ -125,7 +125,7 @@ class TetrisAgent:
             x, y = cur.get_pos()
             for i in range(cur.size):
                 for j in range(cur.size):
-                    if cur.grid[i][j] == 1 and (j + y + 1 >= 20 or state.grid[i][j + y + 1] == 1): 
+                    if cur.grid[i][j] == 1 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] == 1): 
                         # there is brick just under the current tetromino
                         action = Action(cur.type, cur.pos, cur.rotation)
                         res.append(action)

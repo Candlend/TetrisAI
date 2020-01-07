@@ -106,7 +106,6 @@ class Tetromino:
         # 0: go down 1 grid
         if action == 0:
             self.pos[1] += 1
-            self.rotation = 0
             return 
         # 1: go left
         if action == 1:
@@ -115,7 +114,6 @@ class Tetromino:
         # 2: go right
         if action == 2:
             self.pos[0] += 1
-            self.rotation = 1
             return
         # 3: turn left
         if action == 3:
@@ -126,5 +124,10 @@ class Tetromino:
         if action == 4:
             self.set_direction('right')
             self.rotation = 1
+            return 
+        # 5: turn down
+        if action == 5:
+            self.set_direction('down')
+            self.rotation = 2
             return 
         return
