@@ -1,7 +1,7 @@
 import random
 import util
 import pygame
-
+import copy
 
 class Action:
     def __init__(self, tet_type, pos, direction):
@@ -89,61 +89,37 @@ class TetrisAgent:
             else:
                 action = self.get_policy(state)
         return action
+    # Judge if the block has collision to now grid or out of the edge.
+    def is_colli(self, tetromino, state):
+        pass
 
     def get_legal_actions(self, state):
+        actions = ['up', 'down', 'left', 'right']
         tet = state.cur_tetromino
         _tet = tet.type
-        _pos = [0, 0]
-        if _tet == 's':
-            grid = [
-                [0, 1, 0],
-                [1, 1, 0],
-                [1, 0, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'z':
-            grid = [
-                [1, 0, 0],
-                [1, 1, 0],
-                [0, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'j':
-            grid = [
-                [1, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'l':
-            grid = [
-                [0, 1, 0],
-                [0, 1, 0],
-                [1, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 't':
-            grid = [
-                [0, 1, 0],
-                [1, 1, 0],
-                [0, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'o':
-            grid = [
-                [1, 1],
-                [1, 1]
-            ]
-            _pos = [4, 0]
-        elif _tet == 'i':
-            grid = [
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-                [0, 1, 0, 0]
-            ]
-            _pos = [3, 0]
-        else:
-            raise Exception("Invalid tet type")
-        action = Action(_tet, _pos, "up")
-        return [action]
+        _pos = None
+        grid = None
+        grid, _pos = tet.spawn_tet()
+        q = MovingQueue()
+        q.push(tet)
+        res = []
+        while not q.isEmpty:
+            cur = q.pop()
+            
+        return res
+
+class MovingQueue(util.Queue):
+    # Judge two blocks if they have collision
+    def is_colli(self, a, b):
+        pass
+
+    def push(self, item):
+        for i in self.list:
+            if self.is_colli(i, item):
+                return
+        tmp = None
+        tmp = copy.deepcopy(item)
+        self.list.insert(0, tmp)
+
+    def copy(self, q):
+        q.list = list(self.list)
