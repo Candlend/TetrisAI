@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AI::init_obj" Collapsed="true">
+    <Position X="8.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>tetris_gem.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AI::Tetris" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAECiRBAgCDEAQAFMB0JAAgABQIAgFDAlIAJwQ=</HashCode>
+      <FileName>tetris.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AI::mtrandom" Collapsed="true">
+    <Position X="3" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAEBAABAAAQIAAAAAAAAIAIAAIEAQAAAAIAAAA=</HashCode>
+      <FileName>random.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AI::Random" Collapsed="true">
+    <Position X="4.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAQAAAAAAAAAAIAAAABAAAAAABAAAAAAE=</HashCode>
+      <FileName>random.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EvE" Collapsed="true">
+    <Position X="4.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAhgAAIAIABAAAANAAAQAAAAAAIAAJIAgAkBQJAAAg=</HashCode>
+      <FileName>gamemode.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CProfile" Collapsed="true">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAABgAAAAAAAAAoEAAIQAAAAAAQBAAAAAKQAAAAA=</HashCode>
+      <FileName>Profile.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameSound" Collapsed="true">
+    <Position X="6.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAUJgEBAIAAQIAAAAAAABEEBAAAogAAAAsEkUAEAAA=</HashCode>
+      <FileName>sound.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TetrisGame" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EgYAIAAGAwWABCAGEAQQAEEAAERYAoAYAQBIAgAQolA=</HashCode>
+      <FileName>tetrisgame.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="AI::initobj" Collapsed="true">
+    <Position X="6.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>gamepool.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::_ai_settings" Collapsed="true">
+    <Position X="3" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAACAAAAAAAAAAAAAAgAAAAAAAAAAAg=</HashCode>
+      <FileName>tetris_ai.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::MovsState" Collapsed="true">
+    <Position X="8.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAoAAAAAAEABAAAABAAAAABgAQgAAAACAA=</HashCode>
+      <FileName>tetris_ai.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::GameState" Collapsed="true">
+    <Position X="3" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAIAAACAAAAAQAAAABAAAAIgAAgAAAAIAA=</HashCode>
+      <FileName>tetris_ai.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::AI_THREAD_PARAM" Collapsed="true">
+    <Position X="6.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAEAAAAAAAQAIAAhABAAAEAAAEJAghggAIAIAA=</HashCode>
+      <FileName>tetris_ai.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::GameField" Collapsed="true">
+    <Position X="8.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQEwAAAMAAAIAEUAQAAAIQACYAFCAAAAQAAiAFAAAAQ=</HashCode>
+      <FileName>gamepool.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::point" Collapsed="true">
+    <Position X="3" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAA=</HashCode>
+      <FileName>tetris.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::Moving" Collapsed="true">
+    <Position X="8.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAACAIEQAAAAAAAAAAAABgAAAAIAA=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::MovingSimple" Collapsed="true">
+    <Position X="3" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAACAAAIEQAAAAAAAAAIAABgAIAAAAA=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::MovList&lt;T&gt;" Collapsed="true">
+    <Position X="4.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAECAAAAAAAAAIBAAoACAAACAAAAAAAIAAAAAAA=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::MovQueue&lt;T&gt;" Collapsed="true">
+    <Position X="6.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAEAABAAAAAAAIFEAIACFAAAAAAAAAEIAAAAAAA=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::AI_Param" Collapsed="true">
+    <Position X="4.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAABCAAIgAAAAAEAABAACAQAgAABEQgAAAAAAAAg=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="AI::Gem" Collapsed="true">
+    <Position X="4.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAACAAAAAAAAAAAAAABAAIAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>tetris_gem.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="tetris_ai" Collapsed="true">
+    <Position X="4.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAQAAAAAAAABAEEAAAAAAAAAAAAABA=</HashCode>
+      <FileName>main.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="tetris_rule" Collapsed="true">
+    <Position X="8.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAMAAAAAAIAAgAAAAAAAFAAIAAAAIAAAAAAAAQ=</HashCode>
+      <FileName>main.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="tetris_player" Collapsed="true">
+    <Position X="6.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAIAAAAEAIAgAAACAAEAAAIAAA=</HashCode>
+      <FileName>main.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="AI::uint64" Collapsed="true">
+    <Position X="8.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>gamepool.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="AI::AIName_t" Collapsed="true">
+    <Position X="3" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="AI::TetrisAI_t" Collapsed="true">
+    <Position X="4.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>tetris_ai.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="AI::uint32" Collapsed="true">
+    <Position X="6.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>random.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="AI::__unnamed_enum_0004_1" Collapsed="true">
+    <Position X="3" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAUAAAAAAAQAAAAABAAAAAAAE=</HashCode>
+      <FileName>genmove.cpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AI::__unnamed_enum_000d_1" Collapsed="true">
+    <Position X="4.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAUAAAAAAAQAAAAABAAAAAAAE=</HashCode>
+      <FileName>tetris_ai.cpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="AI::GemType" Collapsed="true">
+    <Position X="6.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAABAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>tetris_gem.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>
