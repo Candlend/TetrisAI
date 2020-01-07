@@ -147,32 +147,3 @@ class TetrisAgent:
             raise Exception("Invalid tet type")
         action = Action(_tet, _pos, "up")
         return [action]
-
-def play_auto():
-    screen.fill((0, 0, 0))
-    pygame.display.flip()
-    frame = 0
-    field = PlayField([32 * 2, 0])
-    field.blit_previews()
-    blit_stats_constants()
-    game_intro()
-    field.new_piece()
-    game_start_time = time()
-    agent = TetrisAgent()
-    seconds = 0
-    while True:
-        state = field.get_state()
-        action = agent.get_action(state)
-        # action = Action("l", [4, 4], "left")
-        field.take_action(action)
-        next_state = field.get_state()
-        reward = agent.get_reward(state, action, next_state)
-        agent.observe_transition(state, action, next_state, reward)
-        _time = time() - game_start_time
-        screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
-        screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
-        pygame.display.flip()
-        pygame.event.pump()
-        seconds += 1
-        sleep(1)
-
