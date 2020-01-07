@@ -230,7 +230,8 @@ class PlayField:
             self.new_piece()
         # self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
-        self.cur_tetromino.set_direction(action.direction)
+        self.cur_tetromino.grid = action.grid
+        self.cur_tetromino.rotation = action.rotation
         self.cur_tetromino.pos = action.pos
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
 

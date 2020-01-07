@@ -3,19 +3,13 @@ import util
 import pygame
 import copy
 
+
 class Action:
-    def __init__(self, tet_type, pos, rotation):
+    def __init__(self, tet_type, pos, rotation, grid):
         self.tet_type = tet_type
         self.pos = pos
-        if rotation == 0:
-            self.direction = 'up'
-        elif rotation == 1:
-            self.direction = 'right'
-        elif rotation == 2:
-            self.direction = 'double'
-        elif rotation == 3:
-            self.direction = 'left'
-        self.grid = None  # TODO
+        self.rotation = rotation
+        self.grid = grid
 
 
 class GameState:
@@ -128,7 +122,7 @@ class TetrisAgent:
                 for j in range(cur.size):
                     if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
                         # there is brick just under the current tetromino
-                        action = Action(cur.type, cur.pos, cur.rotation)
+                        action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
                         res.append(action)
                         flag = True
                         break

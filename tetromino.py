@@ -80,25 +80,28 @@ class Tetromino:
             for y in range(length):
                 for x in range(length):
                     new_grid[x][length - y - 1] = self.grid[y][x]
+            self.rotation -= 1
+            if self.rotation == -1:
+                self.rotation = 3
         elif direction == 'right':
             for y in range(length):
                 for x in range(length):
                     new_grid[length - x - 1][y] = self.grid[y][x]
+            self.rotation += 1
+            if self.rotation == 4:
+                self.rotation = 0
         elif direction == 'double':
             for y in range(length):
                 self.grid[y].reverse()
                 new_grid[length - y - 1] = self.grid[y]
+            self.rotation += 1
+            if self.rotation == 4:
+                self.rotation = 0
+            self.rotation += 1
+            if self.rotation == 4:
+                self.rotation = 0
         self.grid = [x[:] for x in new_grid]
 
-    def set_direction(self, direction):
-        if direction == 'up':
-            pass
-        elif direction == 'down':
-            self.rotate("double")
-        elif direction == 'left':
-            self.rotate("left")
-        elif direction == 'right':
-            self.rotate("right")
     def get_pos(self):
         return self.pos[0], self.pos[1]
 
@@ -117,17 +120,14 @@ class Tetromino:
             return
         # 3: turn left
         if action == 3:
-            self.set_direction('left')
-            self.rotation = 3
+            self.rotate("left")
             return 
         # 4: turn right
         if action == 4:
-            self.set_direction('right')
-            self.rotation = 1
+            self.rotate("right")
             return 
         # 5: turn down
         if action == 5:
-            self.set_direction('down')
-            self.rotation = 2
+            self.rotate('double')
             return 
         return
