@@ -6,18 +6,23 @@ import pygame
 from keyboard import is_pressed
 from ai import Action, GameState, TetrisAgent
 from tetromino import Tetromino
+import numpy as np
 
 # 0, 0 is TOP LEFT FOR BLITTING - REMEMBER
 # piece order - 0S, 1Z, 2J, 3L, 4T, 5O, 6I, 7Garbage
 
 
 class PlayField:
-    def __init__(self, position):  # position is top left of field - DOES NOT INCLUDE BORDER
+    def __init__(self, position, grid, next_pieces):  # position is top left of field - DOES NOT INCLUDE BORDER
         self.position = position  # [64, 0] for now
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
-        self.field = [[0 for _ in range(20)] for _ in range(10)]
+        if grid is None:
+            self.field = [[0 for _ in range(20)] for _ in range(10)]
+        else:
+            self.field = np.transpose(grid)
+
         self.overflow_field = [[0 for _ in range(20)] for _ in range(10)]
 
         self.fall_delay = 15  # every 15 frames at 30fps
@@ -42,9 +47,12 @@ class PlayField:
         self.presses = []
         self.placed_piece = False
 
-        self.next_pieces = []
-        self.next_pieces.extend(make_bag())
-        self.next_pieces.extend(make_bag())
+        if next_pieces is None:
+            self.next_pieces = []
+            self.next_pieces.extend(make_bag())
+            self.next_pieces.extend(make_bag())
+        else:
+            self.next_pieces = next_pieces
 
         self.cur_tetromino = None
 
@@ -54,6 +62,7 @@ class PlayField:
         screen.fill((60, 60, 60), (position[0] - self.left_border, position[1], self.left_border, 32 * 20))
         screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
         self.update_score()
+        self.reblit_field()
 
     def advance_frame(self, presses):
         if self.cur_tetromino.ghost_pos != [None, None]:
@@ -542,10 +551,35 @@ def play_game():
 
 
 def play_auto():
+    grid = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    ]
+
+    next_pieces = ['s', 'z', 'j', 'l', 't', 'o', 'i', 's', 'z', 'j', 'l', 't', 'o', 'i']
+
     screen.fill((0, 0, 0))
     pygame.display.flip()
     frame = 0
-    field = PlayField([32 * 2, 0])
+    field = PlayField([32 * 2, 0], grid, next_pieces)
     field.blit_previews()
     blit_stats_constants()
     game_intro()
