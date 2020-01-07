@@ -8,149 +8,6 @@ import pygame
 from keyboard import is_pressed
 
 
-class Action:
-    def __init__(self, tet_type, pos, direction):
-        self.tet_type = tet_type
-        self.pos = pos
-        self.direction = direction
-        self.grid = None  # TODO
-
-
-class GameState:
-    def __init__(self, field):
-        self.field = field
-        self.grid = self.field.field
-        self.total_score = self.field.total_score
-        self.next_pieces = self.field.next_pieces
-        self.cur_tetromino = self.field.cur_tetromino
-
-    def update(self):
-        self.grid = self.field.field
-        self.total_score = self.field.total_score
-        self.next_pieces = self.field.next_pieces
-        self.cur_tetromino = self.field.cur_tetromino
-
-    def take_action(self, action):
-        self.field.take_action(action)
-        self.update()
-
-
-class TetrisAgent:
-    def __init__(self, **args):
-        self.alpha = 0.5
-        self.epsilon = 0.5
-        self.discount = 0.5
-        self.QValues = util.Counter()
-        self.weights = util.Counter()
-        self.feats = util.Counter()
-
-    def get_weights(self):
-        return self.weights
-
-    def get_features(self, state, action):
-        return self.feats
-
-    def get_q_value(self, state, action):
-        sum_value = 0
-        feats = self.get_features(state, action)
-        for feature, value in feats.items():
-            sum_value += self.weights[feature] * value
-        return sum_value
-
-    def get_next_state(self, state, action):
-        pass
-
-    def update(self, state, action, next_state, reward):
-        features = self.get_features(state, action)
-        diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
-        for feature, value in features.items():
-            self.weights[feature] += self.alpha * diff * value
-
-    def get_policy(self, state):
-        max_value = - float("inf")
-        best_action = None
-        for action in self.get_legal_actions(state):
-            value = self.get_q_value(state, action)
-            if value > max_value:
-                max_value = value
-                best_action = action
-        return best_action
-
-    def get_value(self, state):
-        action = self.get_policy(state)
-        if action is None:
-            return 0.0
-        return self.get_q_value(state, action)
-
-    def get_action(self, state):
-        legal_actions = self.get_legal_actions(state)
-        action = None
-        if len(legal_actions) != 0:
-            if util.flipCoin(self.epsilon):
-                action = random.choice(legal_actions)
-            else:
-                action = self.get_policy(state)
-        return action
-
-    def get_legal_actions(self, state):
-        tet = state.cur_tetromino
-        _tet = tet.type
-        _pos = [0, 0]
-        if _tet == 's':
-            grid = [
-                [0, 1, 0],
-                [1, 1, 0],
-                [1, 0, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'z':
-            grid = [
-                [1, 0, 0],
-                [1, 1, 0],
-                [0, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'j':
-            grid = [
-                [1, 1, 0],
-                [0, 1, 0],
-                [0, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'l':
-            grid = [
-                [0, 1, 0],
-                [0, 1, 0],
-                [1, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 't':
-            grid = [
-                [0, 1, 0],
-                [1, 1, 0],
-                [0, 1, 0]
-            ]
-            _pos = [3, 0]
-        elif _tet == 'o':
-            grid = [
-                [1, 1],
-                [1, 1]
-            ]
-            _pos = [4, 0]
-        elif _tet == 'i':
-            grid = [
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-                [0, 1, 0, 0],
-                [0, 1, 0, 0]
-            ]
-            _pos = [3, 0]
-        else:
-            raise Exception("Invalid tet type")
-        action = Action(_tet, _pos, "up")
-        return [action]
-
-
 # 0, 0 is TOP LEFT FOR BLITTING - REMEMBER
 # piece order - 0S, 1Z, 2J, 3L, 4T, 5O, 6I, 7Garbage
 
@@ -234,16 +91,6 @@ class Tetromino:
                 self.grid[y].reverse()
                 new_grid[length - y - 1] = self.grid[y]
         self.grid = [x[:] for x in new_grid]
-
-    def set_direction(self, direction):
-        if direction == 'up':
-            pass
-        elif direction == 'down':
-            self.rotate("double")
-        elif direction == 'left':
-            self.rotate("left")
-        elif direction == 'right':
-            self.rotate("right")
 
 
 class PlayField:
@@ -444,31 +291,6 @@ class PlayField:
 
             if not self.test_array():
                 quit_game()  # end by spawn overlap
-
-    def take_action(self, action):
-        self.blit_previews()
-        if action.tet_type != self.cur_tetromino.type:
-            if self.hold_tet != '':
-                self.next_pieces.insert(0, self.hold_tet)
-            self.hold_tet = self.cur_tetromino.type
-            screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
-            self.new_piece()
-
-        self.cur_tetromino = Tetromino(action.tet_type)
-        self.cur_tetromino.set_direction(action.direction)
-        self.cur_tetromino.pos = action.pos
-        self.cur_tetromino.ghost_pos = self.find_ghost_pos()
-
-        self.place_piece()
-        blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
-
-        if self.clear_lines(self.cur_tetromino.ghost_pos):
-            self.reblit_field()
-
-        self.new_piece()
-
-        if not self.test_array():
-            quit_game()
 
     def reblit_field(self):
         screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
@@ -691,15 +513,6 @@ def blit_tet(grid, tet, coordinates, ghost=False, position=None):  # coords are 
                                 (32 * (coordinates[0] + x) + position[0], 32 * (coordinates[1] + y) + position[1]))
 
 
-def test_for_presses():
-    presses = []
-    for button in buttons:
-        if is_pressed(button):
-            presses.append(button)
-    if 's' in presses:  # put hard drop at end if there - want to process it last.
-        del presses[presses.index('s')]
-        presses.append('s')
-    return presses
 
 
 def first_non_zero(my_list):
@@ -709,118 +522,177 @@ def first_non_zero(my_list):
     return None
 
 
-def game_intro():
-    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
-    screen.blit(helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
-    pygame.display.flip()
-    sleep(1)
-    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
-    screen.blit(helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
-    pygame.display.flip()
-    sleep(1)
-    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
 
 
-def blit_stats_constants():
-    screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
-    screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
+class Game:
+    def __init__(self):
+        pygame.init()
+        seed(a=None, version=2)
+        self.helvetica_big = pygame.font.SysFont('Helvetica', 40)
+        self.helvetica_small = pygame.font.SysFont('Helvetica', 20)
 
+        self.screen_width = 32 * 16
+        self.screen_height = 32 * 20
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
 
-def quit_game():
-    pygame.quit()
-    sys.exit()
+        self.tet_table = load_tile_line("imgs/blocks32.png", 32)
+        self.ghost_tet_table = load_tile_line("imgs/ghostblocks32.png", 32)
+        self.prev_tet_table = load_tile_line("imgs/prev_blocks16.png", 64)
 
+        self.tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
+        f = open("settings/controls.txt", 'r')
+        self.buttons = []
+        for n in range(0, 8):
+            self.buttons.append(f.readline().split()[0])
+        self.frame = 0
+        self.field = None
 
-def play_game():
-    screen.fill((0, 0, 0))
-    pygame.display.flip()
-    frame = 0
-    field = PlayField([32 * 2, 0])
-    field.blit_previews()
-    blit_stats_constants()
-    game_intro()
-    field.new_piece()
-    game_start_time = time()
-    while True:
-        start = time()
-
-        presses = test_for_presses()
-        if buttons[7] in presses and time() - game_start_time > 0.1:  # reset
-            frame = 0
-            screen.fill((0, 0, 0))
-            field = PlayField([32 * 2, 0])
-            field.blit_previews()
-            blit_stats_constants()
-            game_intro()
-            field.new_piece()
-            game_start_time = time()
-            start = time()
-            presses = test_for_presses()
-
-        field.advance_frame(presses)
-
-        # Pieces per second and time display
-        if (frame - 1) % 30 == 0:
-            _time = time() - game_start_time
-            screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
-            screen.blit(helvetica_small.render(str(round(_time, 2)), False, (150, 150, 150)), (32 * 14, 64))
-
+    def intro(self):
+        self.screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+        self.screen.blit(self.helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
         pygame.display.flip()
-        pygame.event.pump()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        frame += 1
-        sleep(max(0.0, 0.03333333333 - (time() - start)))
-
-
-def play_auto():
-    screen.fill((0, 0, 0))
-    pygame.display.flip()
-    frame = 0
-    field = PlayField([32 * 2, 0])
-    field.blit_previews()
-    blit_stats_constants()
-    game_intro()
-    field.new_piece()
-    game_start_time = time()
-    agent = TetrisAgent()
-    seconds = 0
-    while True:
-        state = GameState(field)
-        action = agent.get_action(state)
-        # action = Action("l", [4, 4], "left")
-        field.take_action(action)
-        _time = time() - game_start_time
-        screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
-        screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
-        pygame.display.flip()
-        pygame.event.pump()
-        seconds += 1
         sleep(1)
+        self.screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+        self.screen.blit(self.helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
+        pygame.display.flip()
+        sleep(1)
+        self.screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+
+    def blit_stats_constants(self):
+        self.screen.blit(self.helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
+        self.screen.blit(self.helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
+
+    def test_for_presses(self):
+        presses = []
+        for button in self.buttons:
+            if is_pressed(button):
+                presses.append(button)
+        if 's' in presses:  # put hard drop at end if there - want to process it last.
+            del presses[presses.index('s')]
+            presses.append('s')
+        return presses
+
+    def play(self):
+        self.screen.fill((0, 0, 0))
+        pygame.display.flip()
+        self.field = PlayField([32 * 2, 0])
+        self.field.blit_previews()
+        self.blit_stats_constants()
+        self.intro()
+        self.field.new_piece()
+        game_start_time = time()
+        while True:
+            start = time()
+
+            presses = self.test_for_presses()
+            if self.buttons[7] in presses and time() - game_start_time > 0.1:  # reset
+                frame = 0
+                self.screen.fill((0, 0, 0))
+                self.field = PlayField([32 * 2, 0])
+                self.field.blit_previews()
+                self.blit_stats_constants()
+                self.intro()
+                self.field.new_piece()
+                game_start_time = time()
+                start = time()
+                presses = self.test_for_presses()
+
+            self.field.advance_frame(presses)
+
+            # Pieces per second and time display
+            if (self.frame - 1) % 30 == 0:
+                _time = time() - game_start_time
+                self.screen.fill((0, 0, 0), (32 * 14, 20, 6 * 32, 20))
+                self.screen.blit(self.helvetica_small.render(str(round(self.field.pieces_placed / _time, 2)), False, (150, 150, 150)),
+                            (32 * 14, 18))
+                self.screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
+                self.screen.blit(self.helvetica_small.render(str(round(_time, 2)), False, (150, 150, 150)), (32 * 14, 64))
+
+            pygame.display.flip()
+            pygame.event.pump()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            self.frame += 1
+            sleep(max(0.0, 0.03333333333 - (time() - start)))
+
+    def quit(self):
+        pygame.quit()
+        sys.exit()
+
+
+class FeatureExtractor:
+    def getFeatures(self, state, action):
+        feats = util.Counter()
+        feats[(state,action)] = 1.0
+        return feats
+
+
+class TetrisAgent:
+    def __init__(self, **args):
+        self.alpha = 0.5
+        self.epsilon = 0.5
+        self.discount = 0.5
+        self.QValues = util.Counter()
+        self.featExtractor = FeatureExtractor()
+        self.weights = util.Counter()
+
+    def getWeights(self):
+        return self.weights
+
+    def getQValue(self, state, action):
+        sum = 0
+        features = self.featExtractor.getFeatures(state, action)
+        for feature, value in features.items():
+            sum += self.weights[feature] * value
+        return sum
+
+    def update(self, state, action, nextState, reward):
+        features = self.featExtractor.getFeatures(state, action)
+        diff = reward + self.discount * self.getValue(nextState) - self.getQValue(state, action)
+        for feature, value in features.items():
+            self.weights[feature] += self.alpha * diff * value
+
+    def getPolicy(self, state):
+        return self.computeActionFromQValues(state)
+
+    def getValue(self, state):
+        return self.computeValueFromQValues(state)
+
+    def computeValueFromQValues(self, state):
+
+        action = self.getPolicy(state)
+        if action is None:
+            return 0.0
+        return self.getQValue(state, action)
+
+    def computeActionFromQValues(self, state):
+        maxValue = - float("inf")
+        bestAction = None
+        for action in self.getLegalActions(state):
+            value = self.getQValue(state, action)
+            if value > maxValue:
+                maxValue = value
+                bestAction = action
+        return bestAction
+
+    def getAction(self, state):
+        legalActions = self.getLegalActions(state)
+        action = None
+        if len(legalActions) != 0:
+            if util.flipCoin(self.epsilon):
+                action = random.choice(legalActions)
+            else:
+                action = self.getPolicy(state)
+
+        return action
+
+    def getLegalActions(self, state):
+        return []
 
 
 if __name__ == '__main__':
     # os.environ["SDL_VIDEODRIVER"] = "dummy"
-    pygame.init()
-    seed(a=None, version=2)
-    helvetica_big = pygame.font.SysFont('Helvetica', 40)
-    helvetica_small = pygame.font.SysFont('Helvetica', 20)
-
-    screen_width = 32 * 16
-    screen_height = 32 * 20
-    screen = pygame.display.set_mode((screen_width, screen_height))
-
-    tet_table = load_tile_line("imgs/blocks32.png", 32)
-    ghost_tet_table = load_tile_line("imgs/ghostblocks32.png", 32)
-    prev_tet_table = load_tile_line("imgs/prev_blocks16.png", 64)
-
-    tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
-    f = open("settings/controls.txt", 'r')
-    buttons = []
-    for n in range(0, 8):
-        buttons.append(f.readline().split()[0])
-
-    play_auto()
+    game = Game()
