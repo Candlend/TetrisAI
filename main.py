@@ -308,7 +308,7 @@ class PlayField:
         tspin = self.test_if_spin()
         
         grid = self.cur_tetromino.grid
-        coordinates = self.cur_tetromino.pos
+        coordinates = self.cur_tetromino.ghost_pos
         length = self.cur_tetromino.length
         blocks = 0
 
