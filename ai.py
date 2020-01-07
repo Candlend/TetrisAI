@@ -93,6 +93,10 @@ class TetrisAgent:
     # Judge if the block has collision to now grid or out of the edge.
     def is_colli(self, tetromino, state):
         x, y = tetromino.get_pos()
+        if x < 0 or x >= 10:
+            return True
+        if y < 0:
+            return False
         for i in range(tetromino.size):
             for j in range(tetromino.size):
                 # print(x,y,i,j)
@@ -106,13 +110,11 @@ class TetrisAgent:
         actions = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
         tet = state.cur_tetromino
         _tet = tet.type
-        _pos = None
-        grid = None
         grid, _pos = tet.spawn_tet()
         q = util.Queue()
-        close_set = [[[False for ___ in range(4)] for __ in range(25)] for _ in range(10)]
+        close_set = set()
         q.push(tet)
-        close_set[_pos[0]][_pos[1]][tet.rotation] = True
+        close_set.add((_pos[0], _pos[1], tet.rotation))
         res = []
         while not q.isEmpty():
             cur = q.pop()
@@ -120,6 +122,9 @@ class TetrisAgent:
             for i in range(cur.size):
                 flag = False
                 for j in range(cur.size):
+                    if j + y < 0:
+                        flag = True
+                        break
                     if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
                         # there is brick just under the current tetromino
                         action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
@@ -134,7 +139,10 @@ class TetrisAgent:
                 tmp = copy.deepcopy(cur)
                 tmp.take_action(action)
                 tmp_x, tmp_y = tmp.get_pos()
-                if not self.is_colli(tmp, state) and not close_set[tmp_x][tmp_y][tmp.rotation]:
+                p = (tmp_x, tmp_y, tet.rotation)
+                if not self.is_colli(tmp, state) and p not in close_set:
                     q.push(tmp)
-                    close_set[tmp_x][tmp_y][tmp.rotation] = True
+                    close_set.add(p)
+        if len(res) == 0:
+            raise Exception("No legal actions")
         return res

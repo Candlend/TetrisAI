@@ -287,7 +287,7 @@ class PlayField:
 
     def place_piece(self):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
         grid = self.cur_tetromino.grid
-        coordinates = self.cur_tetromino.pos
+        coordinates = self.cur_tetromino.ghost_pos
         length = self.cur_tetromino.length
         blocks = 0
 
