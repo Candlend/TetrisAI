@@ -3,19 +3,13 @@ import util
 import pygame
 import copy
 
+
 class Action:
-    def __init__(self, tet_type, pos, rotation):
+    def __init__(self, tet_type, pos, rotation, grid):
         self.tet_type = tet_type
         self.pos = pos
-        if rotation == 0:
-            self.direction = 'up'
-        elif rotation == 1:
-            self.direction = 'right'
-        elif rotation == 2:
-            self.direction = 'double'
-        elif rotation == 3:
-            self.direction = 'left'
-        self.grid = None  # TODO
+        self.rotation = rotation
+        self.grid = grid
 
 
 class GameState:
@@ -124,7 +118,7 @@ class TetrisAgent:
         grid = None
         grid, _pos = tet.spawn_tet()
         q = util.Queue()
-        close_set = [[[False for ___ in range(4)] for __ in range(20)] for _ in range(10)]
+        close_set = [[[False for ___ in range(4)] for __ in range(25)] for _ in range(10)]
         q.push(tet)
         close_set[_pos[0]][_pos[1]][tet.rotation] = True
         res = []
@@ -132,11 +126,17 @@ class TetrisAgent:
             cur = q.pop()
             x, y = cur.get_pos()
             for i in range(cur.size):
+                flag = False
                 for j in range(cur.size):
                     if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
                         # there is brick just under the current tetromino
-                        action = Action(cur.type, cur.pos, cur.rotation)
+                        action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
                         res.append(action)
+                        flag = True
+                        break
+                if flag:
+                    break
+
             # expend new node
             for action in actions:
                 tmp = copy.deepcopy(cur)
