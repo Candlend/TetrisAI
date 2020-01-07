@@ -4,10 +4,17 @@ import pygame
 import copy
 
 class Action:
-    def __init__(self, tet_type, pos, direction):
+    def __init__(self, tet_type, pos, rotation):
         self.tet_type = tet_type
         self.pos = pos
-        self.direction = direction
+        if rotation == 0:
+            self.direction = 'up'
+        elif rotation == 1:
+            self.direction = 'right'
+        elif rotation == 2:
+            self.direction = 'double'
+        elif rotation == 3:
+            self.direction = 'left'
         self.grid = None  # TODO
 
 
@@ -94,9 +101,10 @@ class TetrisAgent:
         x, y = tetromino.get_pos()
         for i in range(tetromino.size):
             for j in range(tetromino.size):
-                if tetromino.grid[i][j] == 1 and (state.grid[x + i][y + j] == 1
-                 or x + i > 10 or x + i < 0
-                 or y + j > 20):
+                # print(x,y,i,j)
+                if tetromino.grid[i][j] == 1 and (y + j >= 20
+                 or x + i >= 10 or x + i < 0
+                 or state.grid[x + i][y + j] == 1):
                     return True
         return False
 
@@ -112,14 +120,15 @@ class TetrisAgent:
         q.push(tet)
         close_set[_pos[0]][_pos[1]][tet.rotation] = True
         res = []
-        while not q.isEmpty:
+        while not q.isEmpty():
             cur = q.pop()
             x, y = cur.get_pos()
             for i in range(cur.size):
                 for j in range(cur.size):
-                    if cur.grid[i][j] == 1 and state.field.gird([i + x + 1][j] == 1): 
+                    if cur.grid[i][j] == 1 and (j + y + 1 >= 20 or state.grid[i][j + y + 1] == 1): 
                         # there is brick just under the current tetromino
-                        res.append(cur)
+                        action = Action(cur.type, cur.pos, cur.rotation)
+                        res.append(action)
             # expend new node
             for action in actions:
                 tmp = copy.deepcopy(cur)

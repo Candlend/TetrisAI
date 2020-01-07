@@ -552,7 +552,7 @@ def play_game():
         if buttons[7] in presses and time() - game_start_time > 0.1:  # reset
             frame = 0
             screen.fill((0, 0, 0))
-            field = PlayField([32 * 2, 0])
+            field = PlayField([32 * 2, 0], None, None)
             field.blit_previews()
             blit_stats_constants()
             game_intro()

@@ -105,16 +105,16 @@ class Tetromino:
     def take_action(self, action):
         # 0: go down 1 grid
         if action == 0:
-            self.pos[0] += 1
+            self.pos[1] += 1
             self.rotation = 0
             return 
         # 1: go left
         if action == 1:
-            self.pos[1] -= 1
+            self.pos[0] -= 1
             return 
         # 2: go right
         if action == 2:
-            self.pos[1] += 1
+            self.pos[0] += 1
             self.rotation = 1
             return
         # 3: turn left
