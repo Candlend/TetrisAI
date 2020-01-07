@@ -107,7 +107,7 @@ namespace AI {
             }
         }
 #endif
-		if ( 1 || field.row[y+3] & field.m_w_mask ) // ·Ç¿ÕÆøĞĞµÄ»°
+		if ( 1 || field.row[y+3] & field.m_w_mask ) // éç©ºæ°”è¡Œçš„è¯
         {
             MovingSimple m;
             m.x = x;
@@ -241,7 +241,7 @@ namespace AI {
                 int nx = m.x, ny = m.y, ns = m.spin;
                 int wallkick_spin = m.wallkick_spin;
 #ifndef SWITCH_USING_HEIGHT_OPT
-                while ( field.row[ny + cur.geth()] == 0 && ny + cur.geth() <= field.height() ) { // ·Ç¿ÕÆøĞĞ²ÅÄÜÊ¹ÓÃµÄÓÅ»¯
+                while ( field.row[ny + cur.geth()] == 0 && ny + cur.geth() <= field.height() ) { // éç©ºæ°”è¡Œæ‰èƒ½ä½¿ç”¨çš„ä¼˜åŒ–
                     ++ny; wallkick_spin = 0;
                 }
                 while ( ! field.isCollide(nx, ny + 1, getGem(cur.num, ns) ) ) {
@@ -371,7 +371,7 @@ namespace AI {
                 int nx = m.x, ny = m.y, ns = m.spin;
                 ++ny;
                 MovingSimple nm = m;
-                while ( field.row[ny + cur.geth()] == 0 && ny + cur.geth() <= field.height() ) { // ·Ç¿ÕÆøĞĞ²ÅÄÜÊ¹ÓÃµÄÓÅ»¯
+                while ( field.row[ny + cur.geth()] == 0 && ny + cur.geth() <= field.height() ) { // éç©ºæ°”è¡Œæ‰èƒ½ä½¿ç”¨çš„ä¼˜åŒ–
                     ++ny;
                     nm.lastmove = MovingSimple::MOV_D;
                 }
@@ -506,7 +506,7 @@ namespace AI {
             {
                 int nx = m.x, ny = m.y, ns = m.spin;
                 int wallkick_spin = m.wallkick_spin;
-                //while ( field.row[ny + cur.geth()] == 0 && ny + cur.geth() <= field.height() ) { // ·Ç¿ÕÆøĞĞ²ÅÄÜÊ¹ÓÃµÄÓÅ»¯
+                //while ( field.row[ny + cur.geth()] == 0 && ny + cur.geth() <= field.height() ) { // éç©ºæ°”è¡Œæ‰èƒ½ä½¿ç”¨çš„ä¼˜åŒ–
                 //    ++ny; wallkick_spin = 0;
                 //}
                 while ( ! field.isCollide(nx, ny + 1, getGem(cur.num, ns) ) ) {
