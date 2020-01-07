@@ -110,7 +110,7 @@ class TetrisAgent:
         grid = None
         grid, _pos = tet.spawn_tet()
         q = util.Queue()
-        close_set = [[[False for ___ in range(4)] for __ in range(20)] for _ in range(10)]
+        close_set = [[[False for ___ in range(4)] for __ in range(25)] for _ in range(10)]
         q.push(tet)
         close_set[_pos[0]][_pos[1]][tet.rotation] = True
         res = []
