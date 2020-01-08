@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0
+        self.alpha = 0.00001
         self.epsilon = 0
         self.discount = 0.8
         self.QValues = util.Counter()
@@ -274,7 +274,9 @@ class TetrisAgent:
 
         rowEliminatedSquare = rowEliminated ** 2
 
-        tSpinStruct = helper.get_Tspin_struct(grid)
+        tSpinStructs = helper.get_Tspin_struct(grid)
+        # print(tSpinStructs)
+        tSpinStruct = tSpinStructs[0] + tSpinStructs[1] * 4 + tSpinStructs[2] * 16 + tSpinStructs[3] * 64
 
         feats["landingHeight"]       = landingHeight
         feats["rowTransitions"]      = rowTransitions
