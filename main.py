@@ -230,11 +230,19 @@ class PlayField:
             self.new_piece()
         # self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
-        self.cur_tetromino.grid = action.grid
-        self.cur_tetromino.rotation = action.rotation
-        self.cur_tetromino.pos = action.pos
-        self.cur_tetromino.ghost_pos = self.find_ghost_pos()
+        for each in action.moving:
+            start = time()
+            blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.pos)
+            self.cur_tetromino.take_action(each)
+            blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
+            pygame.display.flip()
+            sleep(max(0.0, 0.03333333333 - (time() - start)))
 
+        # self.cur_tetromino.grid = action.grid
+        # self.cur_tetromino.rotation = action.rotation
+        # self.cur_tetromino.pos = action.pos
+
+        self.cur_tetromino.ghost_pos = self.find_ghost_pos()
         self.place_piece()
         blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
@@ -518,11 +526,11 @@ def game_intro():
     screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
     screen.blit(helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
     pygame.display.flip()
-    sleep(1)
+    sleep(0.3)
     screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
     screen.blit(helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
     pygame.display.flip()
-    sleep(1)
+    sleep(0.3)
     screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
 
 
@@ -618,6 +626,7 @@ def play_auto():
     game_start_time = time()
     agent = TetrisAgent()
     seconds = 0
+    screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
     while True:
         state = GameState(field)
         action = agent.get_action(state)
@@ -626,6 +635,7 @@ def play_auto():
         reward = agent.get_reward(state, action, next_state)
         agent.observe_transition(state, action, next_state, reward)
         _time = time() - game_start_time
+        seconds += 1
         screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
         screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
         pygame.display.flip()
@@ -634,8 +644,7 @@ def play_auto():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        seconds += 1
-        sleep(0.3)
+        # sleep(0.3)
 
 
 if __name__ == '__main__':

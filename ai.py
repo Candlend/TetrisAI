@@ -5,11 +5,12 @@ import copy
 
 
 class Action:
-    def __init__(self, tet_type, pos, rotation, grid):
-        self.tet_type = tet_type
-        self.pos = pos
-        self.rotation = rotation
-        self.grid = grid
+    def __init__(self, tet):
+        self.tet_type = tet.type
+        self.pos = tet.pos
+        self.rotation = tet.rotation
+        self.grid = tet.grid
+        self.moving = tet.moving
 
 
 class GameState:
@@ -95,14 +96,12 @@ class TetrisAgent:
         x, y = tetromino.get_pos()
         if x < 0 or x >= 10:
             return True
-        if y < 0:
-            return False
         for i in range(tetromino.size):
             for j in range(tetromino.size):
                 # print(x,y,i,j)
-                if tetromino.grid[i][j] > 0 and (y + j >= 20
-                 or x + i >= 10 or x + i < 0
-                 or state.grid[x + i][y + j] > 0):
+                if y + j < 0:
+                    continue
+                if tetromino.grid[i][j] > 0 and (y + j >= 20 or x + i >= 10 or x + i < 0 or state.grid[x + i][y + j] > 0):
                     return True
         return False
 
@@ -127,7 +126,7 @@ class TetrisAgent:
                         break
                     if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
                         # there is brick just under the current tetromino
-                        action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
+                        action = Action(cur)
                         res.append(action)
                         flag = True
                         break
@@ -137,9 +136,10 @@ class TetrisAgent:
             # expend new node
             for action in actions:
                 tmp = copy.deepcopy(cur)
+                tmp.moving.append(action)
                 tmp.take_action(action)
                 tmp_x, tmp_y = tmp.get_pos()
-                p = (tmp_x, tmp_y, tet.rotation)
+                p = (tmp_x, tmp_y, tmp.rotation)
                 if not self.is_colli(tmp, state) and p not in close_set:
                     q.push(tmp)
                     close_set.add(p)
