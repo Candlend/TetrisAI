@@ -34,6 +34,7 @@ class PlayField:
         movement_file = open("settings/DAS ARR.txt", "r")
         self.das = int(movement_file.readline())
         self.arr = int(movement_file.readline())
+        movement_file.close()
 
         self.hold_tet = ''
 
@@ -566,6 +567,7 @@ def blit_stats_constants():
 
 
 def quit_game():
+    agent.quit()
     pygame.quit()
     sys.exit()
 
@@ -626,7 +628,6 @@ def play_auto(grid = None, next_pieces = None):
     blit_stats_constants()
     field.new_piece()
     game_start_time = time()
-    agent = TetrisAgent()
     seconds = 0
     screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
     while True:
@@ -644,8 +645,7 @@ def play_auto(grid = None, next_pieces = None):
         pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                quit_game()
         # sleep(0.3)
 
 
@@ -670,30 +670,31 @@ if __name__ == '__main__':
     for n in range(0, 8):
         buttons.append(f.readline().split()[0])
 
+    agent = TetrisAgent()
 
     # T-spin debug
     grid = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [8, 8, 8, 8, 0, 8, 8, 8, 8, 8],
-    ]
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 8, 0, 0, 8, 8, 0, 0],
+    [0, 0, 0, 8, 0, 0, 0, 8, 0, 0],
+    [0, 0, 0, 8, 8, 0, 8, 8, 0, 0],
+    [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
+    [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
+    [0, 0, 0, 0, 8, 8, 8, 0, 0, 0],
+    [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
+    [8, 8, 0, 0, 8, 8, 8, 0, 0, 8],
+    [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
+    [8, 8, 0, 8, 8, 8, 8, 0, 0, 8],
+]
 
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 

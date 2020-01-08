@@ -5,6 +5,9 @@ import copy
 import numpy as np
 import helper
 
+
+tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
+
 class Action:
     def __init__(self, tet):
         self.tet_type = tet.type
@@ -61,7 +64,7 @@ class GameState:
         length = tet.length
         grid = tet.grid
         coordinates = [tet.pos[0] + offset[0], tet.pos[1] + offset[1]]
-        all_overflow = True
+
         for x in range(length):
             for y in range(length):
                 if grid[x][y] == 1:
@@ -125,10 +128,42 @@ class TetrisAgent:
         self.discount = 0.5
         self.QValues = util.Counter()
         self.weights = util.Counter()
+        weight_file = open("settings/weights.txt", "r")
+        line = weight_file.readline()
+        while line:
+            weight = line.split()
+            self.weights[weight[0]] = eval(weight[1])
+            line = weight_file.readline()
+        weight_file.close()
+
+    def quit(self):
+        weight_file = open("settings/weights.txt", "w")
+        lines = []
+        for key, value in self.weights.items():
+            lines.append(key + " " + str(value))
+        weight_file.writelines(lines)
+        weight_file.close()
 
     def get_weights(self):
         return self.weights
 
+    def get_next_grid(self, state, action):
+        field = state.field.field
+        overflow_field = state.field.overflow_field
+        coordinates = action.pos
+        length = len(action.grid)
+
+        for y in range(length):
+            for x in range(length):
+                if action.grid[x][y] > 0:
+                    if coordinates[1] + y >= 0:
+                        field[coordinates[0] + x][coordinates[1] + y] = tetrominoes.index(
+                            action.tet_type) + 1  # +1 because zero is blank in field
+                    else:
+                        overflow_field[coordinates[0] + x][coordinates[1] + y + 20] = tetrominoes.index(
+                            action.tet_type) + 1
+
+        return field, overflow_field
 
 
     def get_features(self, state, action):
@@ -159,10 +194,6 @@ class TetrisAgent:
 
         #get holes & hole depth & rows with holes
         reachableIdentifier = helper.DyeingAlgorithm(grid)
-        # for i in range(len(grid)):
-        #     for j in range(len(grid[0])):
-        #         if reachableIdentifier[]
-        #         prev = grid[i][j]
 
         columnHeightsSum = 0
         lastColumnHeight = -1
@@ -182,6 +213,18 @@ class TetrisAgent:
             columnHeightsSum += h
         columnHeightsAvg = columnHeightsSum / len(grid_origin)
 
+        for i in range(len(grid)):
+            rowHasHole = False
+            for j in range(len(grid[0])):
+                if reachableIdentifier[i][j] == 1:
+                    if grid[i][j] == 0:
+                        rowHasHole = True
+                        holes += 1
+                        for k in range(len(grid) - 1, -1, -1):
+                            if reachableIdentifier[k][j] == 0:
+                                holeDepth += (i - k - 1)
+                                break
+            rowsWithHoles += rowHasHole
 
         return feats
 
