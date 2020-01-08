@@ -205,7 +205,9 @@ class PlayField:
                 # self.pieces_placed += 1
                 # tspin = self.test_if_spin()
 
-                self.place_piece()
+                if self.place_piece() == 0:
+                    quit_game()
+
                 # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
                 # if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
@@ -253,7 +255,8 @@ class PlayField:
         # self.cur_tetromino.pos = action.pos
 
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
-        self.place_piece()
+        if self.place_piece() == 0:
+            return False
         # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
         # if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
@@ -264,7 +267,8 @@ class PlayField:
         self.rand_add_garbage()
 
         if not self.test_array():
-            quit_game()
+            return False
+        return True
 
     def reblit_field(self):
         screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
@@ -331,13 +335,13 @@ class PlayField:
                         self.overflow_field[coordinates[0] + x][coordinates[1] + y + 20] = tetrominoes.index(
                             self.cur_tetromino.type) + 1
                         blocks -= 1
-        if blocks == 0:  # placing all blocks in the overflow is an end condition
-            quit_game()
 
         blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
         if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
             self.reblit_field()
+
+        return blocks
 
     def new_piece(self):
         self.cur_tetromino = Tetromino(self.next_pieces.pop(0))
@@ -637,7 +641,7 @@ def play_auto(grid = None, next_pieces = None):
     while True:
         state = GameState(field)
         action = agent.get_action(state)
-        field.take_action(action)
+        result = field.take_action(action)
         next_state = GameState(field)
         reward = agent.get_reward(state, action, next_state)
         agent.observe_transition(state, action, next_state, reward)
@@ -650,6 +654,8 @@ def play_auto(grid = None, next_pieces = None):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game()
+        if not result:
+            quit_game()
         # sleep(0.3)
 
 
