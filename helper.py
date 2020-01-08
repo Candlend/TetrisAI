@@ -4,8 +4,8 @@ import matrix_hash
 
 def DyeingAlgorithm(grid):
     '''
-    染色算法, reachableIdentifier中0表示联通的空地，1表示不联通。
-    需要transpose后的grid作为参数，返回一个transpose过的reachableIdentifier
+    染色算法，返回一个将grid中所有的hole全部填满后的新grid
+    需要transpose后的grid（竖着的grid）作为参数
     '''
     reachableIdentifier = np.ones(grid.shape, dtype = 'int') 
     fringe = []
@@ -42,7 +42,6 @@ def GetRowTransition(grid):
     trans = 0
     for i in range(len(grid)):
         prev = -1
-        print("trans:", trans)
         for j in range(len(grid[0])):
             if j != 0:
                 if prev != grid[i][j]:
