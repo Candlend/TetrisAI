@@ -237,12 +237,12 @@ class PlayField:
 
     def take_action(self, action):
         self.blit_previews()
-        if action.tet_type != self.cur_tetromino.type:
-            if self.hold_tet != '':
-                self.next_pieces.insert(0, self.hold_tet)
-            self.hold_tet = self.cur_tetromino.type
-            screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
-            self.new_piece()
+        # if action.tet_type != self.cur_tetromino.type:
+        #     if self.hold_tet != '':
+        #         self.next_pieces.insert(0, self.hold_tet)
+        #     self.hold_tet = self.cur_tetromino.type
+        #     screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
+        #     self.new_piece()
         self.cur_tetromino = Tetromino(action.tet_type)
         for op, kick in action.moving:
             start = time()
@@ -635,8 +635,9 @@ def blit_stats_constants():
 
 def quit_game():
     agent.quit()
-    pygame.quit()
-    sys.exit()
+    raise RuntimeError()
+    # pygame.quit()
+    # sys.exit()
 
 def play_game(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
@@ -769,4 +770,9 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
-    play_auto(None, None)
+    while(True):
+        try:
+            play_auto(None, None)
+        except Exception as e:
+            print(repr(e))
+            pass
