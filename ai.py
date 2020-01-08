@@ -5,6 +5,9 @@ import copy
 import numpy as np
 import helper
 
+
+tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
+
 class Action:
     def __init__(self, tet):
         self.tet_type = tet.type
@@ -144,6 +147,23 @@ class TetrisAgent:
     def get_weights(self):
         return self.weights
 
+    def get_next_grid(self, state, action):
+        field = state.field.field
+        overflow_field = state.field.overflow_field
+        coordinates = action.pos
+        length = len(action.grid)
+
+        for y in range(length):
+            for x in range(length):
+                if action.grid[x][y] > 0:
+                    if coordinates[1] + y >= 0:
+                        field[coordinates[0] + x][coordinates[1] + y] = tetrominoes.index(
+                            action.tet_type) + 1  # +1 because zero is blank in field
+                    else:
+                        overflow_field[coordinates[0] + x][coordinates[1] + y + 20] = tetrominoes.index(
+                            action.tet_type) + 1
+
+        return field, overflow_field
 
 
     def get_features(self, state, action):
