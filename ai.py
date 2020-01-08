@@ -125,6 +125,21 @@ class TetrisAgent:
         self.discount = 0.5
         self.QValues = util.Counter()
         self.weights = util.Counter()
+        weight_file = open("settings/weights.txt", "r")
+        line = weight_file.readline()
+        while line:
+            weight = line.split()
+            self.weights[weight[0]] = eval(weight[1])
+            line = weight_file.readline()
+        weight_file.close()
+
+    def quit(self):
+        weight_file = open("settings/weights.txt", "w")
+        lines = []
+        for key, value in self.weights.items():
+            lines.append(key + " " + str(value))
+        weight_file.writelines(lines)
+        weight_file.close()
 
     def get_weights(self):
         return self.weights
@@ -146,7 +161,7 @@ class TetrisAgent:
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
         maximumHeight = 0               # Maximum pile height: maxp hp, Prevents from having a big pile
 
-        print(state.field.field)
+        # print(state.field.field)
         grid = helper.NormalizeGrid(state.field.field)
 
         # Get column transition
