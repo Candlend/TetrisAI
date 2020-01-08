@@ -4,7 +4,7 @@ import pygame
 import copy
 import numpy as np
 import helper
-
+import math
 
 tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
 
@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.6
+        self.alpha = 0.4
         self.epsilon = 0.2
         self.discount = 0.7
         self.QValues = util.Counter()
@@ -236,7 +236,7 @@ class TetrisAgent:
             if 0 not in grid[i]:
                 rowEliminated += 100
         rowEliminatedSquare = rowEliminated ** 2
-        
+
         # print("==================================")
         # print("landingHeight", landingHeight)
         # print("rowTransitions", rowTransitions)
@@ -277,9 +277,10 @@ class TetrisAgent:
 
     def update(self, state, action, next_state, reward):
         print("==================")
-        
+
         features = self.get_features(state, action)
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
+        m = 0
         print(self.alpha, diff)
         
         nbkey = list(features.keys())[0]
@@ -288,6 +289,11 @@ class TetrisAgent:
         for feature, value in features.items():
             print("===", feature, value, "===")
             self.weights[feature] += self.alpha * diff * value
+            m += self.weights[feature] ** 2
+        m = math.sqrt(m)
+        for feature, value in features.items():
+            self.weights[feature] /= m
+
 
         for feature in features.keys():
             self.weights[feature] = self.weights[feature]/nobias
