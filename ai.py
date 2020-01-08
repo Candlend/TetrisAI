@@ -173,10 +173,10 @@ class TetrisAgent:
 
         #get holes & hole depth & rows with holes
         reachableIdentifier = helper.DyeingAlgorithm(grid)
-        for i in range(len(grid)):
-            for j in range(len(grid[0])):
-                if reachableIdentifier[]
-                prev = grid[i][j]
+        # for i in range(len(grid)):
+        #     for j in range(len(grid[0])):
+        #         if reachableIdentifier[]
+        #         prev = grid[i][j]
 
                     
 
