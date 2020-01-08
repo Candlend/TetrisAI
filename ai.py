@@ -124,8 +124,8 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.05
-        self.epsilon = 0.1
+        self.alpha = 0
+        self.epsilon = 0
         self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
@@ -154,17 +154,22 @@ class TetrisAgent:
         coordinates = action.pos
         length = len(action.grid)
 
-        for y in range(length):
-            for x in range(length):
-                if action.grid[x][y] > 0:
-                    if coordinates[1] + y >= 0:
-                        field[coordinates[0] + x][coordinates[1] + y] = tetrominoes.index(
-                            action.tet_type) + 1  # +1 because zero is blank in field
-                    else:
-                        overflow_field[coordinates[0] + x][coordinates[1] + y + 20] = tetrominoes.index(
-                            action.tet_type) + 1
+        removed_lines = 0
 
-        return field, overflow_field
+        for y in range(length):
+            if 0 <= y + coordinates[1] <= 19:
+                line = field[:, y + coordinates[1]]
+                if 0 not in line:
+                    field = np.insert(np.delete(field, y + coordinates[1], 1), 0, overflow_field[:, 19], 1)
+                    overflow_field = np.insert(np.delete(overflow_field, 19, 1), 0, np.zeros(10, dtype=np.int), 1)
+                    removed_lines += 1
+            elif 0 > y + coordinates[1]:
+                line = overflow_field[:, y + coordinates[1] + 20]
+                if 0 not in line:
+                    overflow_field = np.insert(np.delete(overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
+                    removed_lines += 1
+
+        return field, overflow_field, removed_lines
 
 
     def get_features(self, state, action):
@@ -177,6 +182,7 @@ class TetrisAgent:
         holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
         boardWells = 0                  # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
         wellDepth = 0
+        wellDepthSquare = 0
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
         rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
         columnHeightsAvg = 0            # Average Height of the p columns of the board
@@ -186,7 +192,7 @@ class TetrisAgent:
         rowEliminatedSquare = 0         # squre of rowEliminted
         # blockEliminated = 0
 
-        (grid_origin, overflow_grid) = self.get_next_grid(state, action)
+        (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
         grid = helper.NormalizeGrid(grid_origin)
         # grid_origin = state.field.field
         # grid = helper.NormalizeGrid(grid_origin)
@@ -216,10 +222,20 @@ class TetrisAgent:
             rowsWithHoles += rowHasHole
         
         # get well depth
+        topHeight = 0
+        bottomHeight = 0
+        topFound = False
         for i in range(len(grid)):
-            rowHasHole = False
             for j in range(len(grid[0])):
-        
+                if not topFound:
+                    if reachableIdentifier[i][j] == 1:
+                        topHeight = i
+                        topFound = True
+                if reachableIdentifier[i][j] == 0:
+                    bottomHeight = i
+        wellDepth = bottomHeight - topHeight
+        wellDepthSquare = wellDepth ** 2
+
         # get column height avg, max, difference
         columnHeightsSum = 0
         lastColumnHeight = -1
@@ -239,11 +255,11 @@ class TetrisAgent:
             columnHeightsSum += h
         columnHeightsAvg = columnHeightsSum / len(grid)
 
-        # get row eliminated
-        for i in range(len(grid)):
-            if 0 not in grid[i]:
-                rowEliminated += 1
-        rowEliminated += 1
+        # # get row eliminated
+        # for i in range(len(grid)):
+        #     if 0 not in grid[i]:
+        #         rowEliminated += 1
+        # rowEliminated += 1
 
         rowEliminatedSquare = rowEliminated ** 2
 
@@ -251,6 +267,9 @@ class TetrisAgent:
         feats["rowTransitions"]      = rowTransitions
         feats["columnTransitions"]   = columnTransitions
         feats["holes"]               = holes
+        feats["boardWells"]          = boardWells
+        feats["wellDepth"]           = wellDepth
+        feats["wellDepthSquare"]     = wellDepthSquare
         feats["holeDepth"]           = holeDepth
         feats["rowsWithHoles"]       = rowsWithHoles
         feats["columnHeightsAvg"]    = columnHeightsAvg
@@ -258,7 +277,12 @@ class TetrisAgent:
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
         feats["rowEliminatedSquare"] = rowEliminatedSquare
+
+
+        print("rowEliminated", rowEliminated)
+        print("rowEliminatedSquare", rowEliminatedSquare)
         return feats
+
 
     def get_q_value(self, state, action):
         # sum_value = 0
