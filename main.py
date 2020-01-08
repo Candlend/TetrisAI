@@ -591,7 +591,7 @@ def quit_game():
         raise RuntimeError()
     else:
         pygame.quit()
-        sys.exit()
+        sys.exit(10)
 
 def play_game(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
@@ -723,10 +723,11 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
-    while(True):
-        try:
-            play_auto(None, None)
-        except Exception as e:
-            print(repr(e))
-            print("4")
-            pass
+    # while(True):
+    #     try:
+    #         play_auto(None, None)
+    #     except Exception as e:
+    #         print(repr(e))
+    #         print("4")
+    #         pass
+    play_auto(None, None)
