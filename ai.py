@@ -2,7 +2,7 @@ import random
 import util
 import pygame
 import copy
-
+import matrix_hash
 
 class Action:
     def __init__(self, tet):
@@ -42,6 +42,68 @@ class TetrisAgent:
 
     def get_weights(self):
         return self.weights
+
+    def get_Tspin_struct(self, state):
+        Tspin_struct = [
+            [
+                [0,1],
+                [0,0],
+                [0,1]
+            ],
+            [
+                [0,1],
+                [0,0],
+                [0,1],
+                [1,1]
+            ]
+            [
+                [1,1],
+                [0,1],
+                [0,0],
+                [0,1]
+            ],
+            [
+                [1,1],
+                [0,1],
+                [0,0],
+                [0,1],
+                [1,1]
+            ],
+            [
+                [0,1,1],
+                [0,0,1],
+                [0,0,0],
+                [0,0,1],
+                [0,1,1]
+            ],
+            [
+                [0,1,1],
+                [0,0,1],
+                [0,0,0],
+                [0,0,1],
+                [1,1,1]
+            ],
+            [
+                [1,1,1],
+                [0,0,1],
+                [0,0,0],
+                [0,0,1],
+                [0,1,1]
+            ],
+            [
+                [1,1,1],
+                [0,0,1],
+                [0,0,0],
+                [0,0,1],
+                [1,1,1]
+            ]
+        ]
+        res = [0, 0, 0, 0]
+        res[0] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[0])
+        res[1] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[1]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[2])
+        res[2] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[3])
+        res[3] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[4]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[5]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[6]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[7])
+        return res
 
     def get_features(self, state, action):
         feats = util.Counter()
