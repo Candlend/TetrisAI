@@ -65,18 +65,6 @@ class PlayField:
         self.update_score()
         self.reblit_field()
 
-    def try_move_left(self):
-        if self.test_array(offset=[-1, 0]):
-            self.cur_tetromino.pos[0] -= 1
-            return True
-        return False
-
-    def try_move_right(self):
-        if self.test_array(offset=[1, 0]):
-            self.cur_tetromino.pos[0] += 1
-            return True
-        return False
-
     def try_rotate_left(self):
         self.cur_tetromino.rotate('left')
         if not self.test_array():  # rotates into block - do kick stuff
@@ -394,7 +382,7 @@ class PlayField:
         for test in tests:
             if self.test_array(offset=test):
                 return test
-        return 0
+        return None
 
     def find_ghost_pos(self):
         grid = self.cur_tetromino.grid
@@ -678,7 +666,7 @@ if __name__ == '__main__':
         [8, 8, 0, 8, 8, 8, 8, 0, 0, 8],
     ]
 
-    next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 'j', 'l', 't', 'o', 'i']
+    next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
-    play_game(grid, next_pieces)
-    # play_auto()
+    #play_game(grid, next_pieces)
+    play_auto(grid, next_pieces)

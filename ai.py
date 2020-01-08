@@ -30,6 +30,91 @@ class GameState:
         self.field.take_action(action)
         self.update()
 
+    def test_rotate_right(self, tet):
+        tet.rotate('right')
+        kick = None
+
+        if not self.test_array(tet):  # rotates into block - do kick stuff
+            kick = self.test_srs('right', tet)
+        else:
+            kick = (0, 0) # pos not change
+
+        tet.rotate('left')
+        return kick
+
+    def test_rotate_left(self, tet):
+        tet.rotate('left')
+        kick = None
+
+        if not self.test_array(tet):  # rotates into block - do kick stuff
+            kick = self.test_srs('left', tet)
+        else:
+            kick = (0, 0) # pos not change
+
+        tet.rotate('right')
+        return kick
+
+        
+    def test_array (self, tet, offset = (0,0)):
+        length = tet.length
+        grid = tet.grid
+        coordinates = [tet.pos[0] + offset[0], tet.pos[1] + offset[1]]
+
+        for x in range(length):
+            for y in range(length):
+                if grid[x][y] == 1:
+                    # test for oob or overlapping blocks
+                    _x = coordinates[0] + x
+                    _y = coordinates[1] + y
+
+                    if _x < 0 or _x > 9 or _y > 19:
+                        return False
+                    elif _y >= 0:
+                        if self.grid[_x][_y] > 0:
+                            return False
+                    else:
+                        if self.field.overflow_field[_x][_y + 20] > 0:
+                            return False
+        return True
+
+    def test_srs (self, direction, tet):
+        length = tet.length
+        new_rotation = tet.rotation
+        old_rotation = 0
+        if direction == 'right':
+            old_rotation = (new_rotation - 1) % 4
+        elif direction == 'left':
+            old_rotation = (new_rotation + 1) % 4
+        elif direction == 'double':
+            old_rotation = (new_rotation - 2) % 4
+        tests = []
+
+        if length == 3:  # sztlj
+            if old_rotation == 0 or old_rotation == 2:
+                if new_rotation == 1:  # 0>1 or 2>1
+                    tests = [(-1, 0), (-1, -1), (0, +2), (-1, +2)]
+                elif new_rotation == 3:  # 0>3 or 2>3
+                    tests = [(+1, 0), (+1, -1), (0, +2), (+1, +2)]
+            elif old_rotation == 1:  # 1>0 or 1>2
+                tests = [(+1, 0), (+1, +1), (0, -2), (+1, -2)]
+            elif old_rotation == 3:  # 3>2 or 3>0
+                tests = [(-1, 0), (-1, +1), (0, -2), (-1, -2)]
+        elif length == 4:  # i
+            if (old_rotation == 0 and new_rotation == 1) or (old_rotation == 3 and new_rotation == 2):
+                tests = [(-2, 0), (+1, 0), (-2, +1), (+1, -2)]  # 0>1 or 3>2
+            elif (old_rotation == 1 and new_rotation == 0) or (old_rotation == 2 and new_rotation == 3):
+                tests = [(+2, 0), (-1, 0), (+2, -1), (-1, +2)]  # 1>0 or 2>3
+            elif (old_rotation == 1 and new_rotation == 2) or (old_rotation == 0 and new_rotation == 3):
+                tests = [(-1, 0), (+2, 0), (-1, -2), (+2, +1)]  # 1>2 or 0>3
+            elif (old_rotation == 2 and new_rotation == 1) or (old_rotation == 3 and new_rotation == 0):
+                tests = [(+1, 0), (-2, 0), (+1, +2), (-2, -1)]  # 2>1 or 3>0
+        else:  # o - will never happen. O can't spin into a placed block
+            print('how you do that!')
+
+        for test in tests:
+            if self.test_array(tet, offset=test):
+                return test
+        return None
 
 class TetrisAgent:
     def __init__(self, **args):
@@ -65,10 +150,10 @@ class TetrisAgent:
         for feature, value in features.items():
             self.weights[feature] += self.alpha * diff * value
 
-    def get_policy(self, state):
+    def get_policy(self, state, legal_actions):
         max_value = - float("inf")
         best_action = None
-        for action in self.get_legal_actions(state):
+        for action in legal_actions:
             value = self.get_q_value(state, action)
             if value > max_value:
                 max_value = value
@@ -76,7 +161,8 @@ class TetrisAgent:
         return best_action
 
     def get_value(self, state):
-        action = self.get_policy(state)
+        legal_actions = self.get_legal_actions(state)
+        action = self.get_policy(state, legal_actions)
         if action is None:
             return 0.0
         return self.get_q_value(state, action)
@@ -88,7 +174,7 @@ class TetrisAgent:
             if util.flipCoin(self.epsilon):
                 action = random.choice(legal_actions)
             else:
-                action = self.get_policy(state)
+                action = self.get_policy(state, legal_actions)
         return action
     # Judge if the block has collision to now grid or out of the edge.
     def is_colli(self, tetromino, state):
@@ -118,29 +204,22 @@ class TetrisAgent:
         res = []
         while not q.isEmpty():
             cur = q.pop()
-            x, y = cur.get_pos()
-            for i in range(cur.size):
-                flag = False
-                for j in range(cur.size):
-                    if j + y < 0:
-                        flag = True
-                        break
-                    if cur.grid[i][j] > 0 and (j + y + 1 >= 20 or state.grid[i + x][j + y + 1] > 0):
-                        # there is brick just under the current tetromino
-                        action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
-                        res.append(action)
-                        flag = True
-                        break
-                if flag:
-                    break
-
-            # expend new node
+            if not state.test_array(cur, (0, 1)) and state.test_array(cur):
+                action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
+                res.append(action)
+                
+            # expand new node
             for action in actions:
                 tmp = copy.deepcopy(cur)
-                tmp.take_action(action)
+                kick = state.test_rotate_left(tmp)
+                if action == 3:
+                    kick = state.test_rotate_left(tmp)
+                if action == 4:
+                    kick = state.test_rotate_right(tmp)
+                tmp.take_action(action, kick)
                 tmp_x, tmp_y = tmp.get_pos()
                 p = (tmp_x, tmp_y, tet.rotation)
-                if not self.is_colli(tmp, state) and p not in close_set:
+                if state.test_array(tmp) and p not in close_set:
                     q.push(tmp)
                     close_set.add(p)
         if len(res) == 0:
