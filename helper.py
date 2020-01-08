@@ -51,6 +51,7 @@ def GetRowTransition(grid):
     return trans
 
 def get_Tspin_struct(grid):
+    grid = grid.tolist()
     Tspin_struct = [
         [
             [0,1],
@@ -80,26 +81,55 @@ def get_Tspin_struct(grid):
             [0,1,1],
             [0,0,1],
             [0,0,0],
-            [0,0,1],
+            [1,0,1],
             [0,1,1]
         ],
         [
             [0,1,1],
             [0,0,1],
             [0,0,0],
-            [0,0,1],
+            [1,0,1],
             [1,1,1]
         ],
         [
             [1,1,1],
             [0,0,1],
             [0,0,0],
-            [0,0,1],
+            [1,0,1],
             [0,1,1]
         ],
         [
             [1,1,1],
             [0,0,1],
+            [0,0,0],
+            [1,0,1],
+            [1,1,1]
+        ]
+        ,
+        [
+            [0,1,1],
+            [1,0,1],
+            [0,0,0],
+            [0,0,1],
+            [0,1,1]
+        ],
+        [
+            [0,1,1],
+            [1,0,1],
+            [0,0,0],
+            [0,0,1],
+            [1,1,1]
+        ],
+        [
+            [1,1,1],
+            [1,0,1],
+            [0,0,0],
+            [0,0,1],
+            [0,1,1]
+        ],
+        [
+            [1,1,1],
+            [1,0,1],
             [0,0,0],
             [0,0,1],
             [1,1,1]
@@ -109,5 +139,5 @@ def get_Tspin_struct(grid):
     res[0] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[0])
     res[1] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[1]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[2])
     res[2] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[3])
-    res[3] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[4]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[5]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[6]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[7])
+    res[3] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[4]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[5]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[6]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[7]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[8]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[9]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[10])
     return res
