@@ -18,7 +18,7 @@ class PlayField:
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
-        self.garbage_probs = [0.01, 0.01, 0.01, 0.001, 0.001]
+        self.garbage_probs = [0.4, 0, 0, 0, 0]
         if grid is None:
             self.field = np.zeros((10, 20), dtype=int)
         else:
@@ -249,7 +249,6 @@ class PlayField:
             self.hold_tet = self.cur_tetromino.type
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
-        # self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
         for each in action.moving:
             start = time()
@@ -271,6 +270,7 @@ class PlayField:
             self.reblit_field()
 
         self.new_piece()
+        self.rand_add_garbage()
 
         if not self.test_array():
             quit_game()
@@ -456,7 +456,7 @@ class PlayField:
         garbage = [tetrominoes.index("garbage") + 1 for _ in range(10)]
         garbage[randint(0, 9)] = 0
         garbages = np.array([garbage for _ in range(num_lines)])
-        self.field = np.delete(self.field, range(num_lines - 1), axis=1)
+        self.field = np.delete(self.field, range(num_lines), axis=1)
         self.field = np.column_stack((self.field, garbages.T))
         self.reblit_field()
 
@@ -689,5 +689,5 @@ if __name__ == '__main__':
 
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 'j', 'l', 't', 'o', 'i']
 
-    play_game(grid, next_pieces)
-    # play_auto()
+    # play_game(grid, next_pieces)
+    play_auto()
