@@ -39,13 +39,21 @@ class TetrisAgent:
         self.discount = 0.5
         self.QValues = util.Counter()
         self.weights = util.Counter()
-        self.feats = util.Counter()
 
     def get_weights(self):
         return self.weights
 
     def get_features(self, state, action):
-        return self.feats
+        feats = util.Counter()
+        landingHeight = action.pos[0]   # Height where the last piece is added, Prevents from increasing the pile height
+        # erodedPieceCells              # (Number of rows eliminated in the last move) × (Number of bricks eliminated from the last piece added), Encourages to complete rows
+        rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
+        columnTransitions = 0           # Same thing for vertical transitions
+        Holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
+        # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+
+
+        return feats
 
     def get_q_value(self, state, action):
         sum_value = 0

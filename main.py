@@ -19,6 +19,7 @@ class PlayField:
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
         self.garbage_probs = [0.4, 0, 0, 0, 0]
+        self.combo = 0
         if grid is None:
             self.field = np.zeros((10, 20), dtype=int)
         else:
@@ -212,14 +213,14 @@ class PlayField:
             blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.pos)
 
             if not self.hold:
-                self.pieces_placed += 1
-                self.test_if_spin()
+                # self.pieces_placed += 1
+                # tspin = self.test_if_spin()
 
                 self.place_piece()
-                blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
+                # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
-                if self.clear_lines(self.cur_tetromino.ghost_pos):
-                    self.reblit_field()
+                # if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
+                #     self.reblit_field()
 
             else:
                 blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.ghost_pos)
@@ -264,10 +265,11 @@ class PlayField:
 
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
         self.place_piece()
-        blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
+        # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
-        if self.clear_lines(self.cur_tetromino.ghost_pos):
-            self.reblit_field()
+        # if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
+        #     self.reblit_field()
+
 
         self.new_piece()
         self.rand_add_garbage()
@@ -282,29 +284,36 @@ class PlayField:
                 if self.field[x][y]:
                     screen.blit(tet_table[self.field[x][y] - 1], (32 * x + self.position[0], 32 * y + self.position[1]))
 
-    def clear_lines(self, coordinates):
+    def clear_lines(self, coordinates, tspin):
         length = self.cur_tetromino.length
-        removed_lines = False
+        removed_lines = 0
 
         for y in range(length):
-            line = []
             if 0 <= y + coordinates[1] <= 19:
-                for x in range(10):
-                    line.append(self.field[x][y + coordinates[1]])
+                line = self.field[:, y + coordinates[1]]
                 if 0 not in line:
-                    for i in range(10):
-                        self.field[i] = np.insert(np.delete(self.field[i], y + coordinates[1]), 0, self.overflow_field[i][19])
-                        self.overflow_field[i] = np.insert(np.delete(self.overflow_field[i], 19), 0, 0)
-                    removed_lines = True
-                    self.update_score(10)
+                    self.field = np.insert(np.delete(self.field, y + coordinates[1], 1), 0, self.overflow_field[:, 19], 1)
+                    self.overflow_field = np.insert(np.delete(self.overflow_field, 19, 1), 0, np.zeros(10, dtype=np.int), 1)
+                    removed_lines += 1
             elif 0 > y + coordinates[1]:
-                for x in range(10):
-                    line.append(self.overflow_field[x][y + coordinates[1] + 20])
+                line = self.overflow_field[:, y + coordinates[1] + 20]
                 if 0 not in line:
-                    for i in range(10):
-                        self.overflow_field[i] = np.insert(np.delete(self.overflow_field[i], y + coordinates[1] + 20), 0, 0)
-                    removed_lines = True
-                    self.update_score(10)
+                    self.overflow_field = np.insert(np.delete(self.overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
+                    removed_lines += 1
+
+        if removed_lines:
+            score = 2 ** (removed_lines - 1) * 10
+            if tspin:
+                score *= 4
+            score *= (1 + self.combo * 0.1)
+            self.update_score(score)
+            print("score: ", score)
+            self.combo += 1
+        else:
+            self.combo = 0
+        print("combo: ", self.combo)
+        print("=============")
+
         return removed_lines
 
     def update_score(self, score=0):
@@ -313,6 +322,9 @@ class PlayField:
         screen.blit(helvetica_big.render(str(self.total_score), False, (150, 150, 150)), (32 * 14, self.score_pos_y))
 
     def place_piece(self):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
+        self.pieces_placed += 1
+        tspin = self.test_if_spin()
+
         grid = self.cur_tetromino.grid
         coordinates = self.cur_tetromino.ghost_pos
         length = self.cur_tetromino.length
@@ -331,6 +343,11 @@ class PlayField:
                         blocks -= 1
         if blocks == 0:  # placing all blocks in the overflow is an end condition
             quit_game()
+
+        blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
+
+        if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
+            self.reblit_field()
 
     def new_piece(self):
         self.cur_tetromino = Tetromino(self.next_pieces.pop(0))
@@ -456,6 +473,9 @@ class PlayField:
         garbage = [tetrominoes.index("garbage") + 1 for _ in range(10)]
         garbage[randint(0, 9)] = 0
         garbages = np.array([garbage for _ in range(num_lines)])
+        self.overflow_field = np.insert(np.delete(self.overflow_field, range(20 - num_lines, 20), 1), 0,
+                                        self.field[:, 0:num_lines].T, 1)
+
         self.field = np.delete(self.field, range(num_lines), axis=1)
         self.field = np.column_stack((self.field, garbages.T))
         self.reblit_field()
@@ -675,19 +695,19 @@ if __name__ == '__main__':
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 8, 0, 0, 8, 8, 0, 0],
-        [0, 0, 0, 8, 0, 0, 0, 8, 0, 0],
-        [0, 0, 0, 8, 8, 0, 8, 8, 0, 0],
-        [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
-        [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
-        [0, 0, 0, 0, 8, 8, 8, 0, 0, 0],
-        [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
-        [8, 8, 0, 0, 8, 8, 8, 0, 0, 8],
-        [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
-        [8, 8, 0, 8, 8, 8, 8, 0, 0, 8],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [8, 8, 8, 8, 0, 8, 8, 8, 8, 8],
     ]
 
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 'j', 'l', 't', 'o', 'i']
 
     # play_game(grid, next_pieces)
-    play_auto()
+    play_auto(None, None)
