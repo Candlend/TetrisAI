@@ -248,17 +248,17 @@ class TetrisAgent:
         # print("columnHeightsMax", columnHeightsMax)
         # print("columnDifference", columnDifference)
 
-        feats["landingHeight"]       = -landingHeight
-        feats["rowTransitions"]      = -rowTransitions
-        feats["columnTransitions"]   = -columnTransitions
-        feats["holes"]               = -holes
-        feats["holeDepth"]           = -holeDepth
-        feats["rowsWithHoles"]       = -rowsWithHoles
-        feats["columnHeightsAvg"]    = -columnHeightsAvg
-        feats["columnHeightsMax"]    = -columnHeightsMax
-        feats["columnDifference"]    = -columnDifference
-        feats["rowEliminated"]       = -rowEliminated
-        feats["rowEliminatedSquare"] = -rowEliminatedSquare
+        feats["landingHeight"]       = landingHeight
+        feats["rowTransitions"]      = rowTransitions
+        feats["columnTransitions"]   = columnTransitions
+        feats["holes"]               = holes
+        feats["holeDepth"]           = holeDepth
+        feats["rowsWithHoles"]       = rowsWithHoles
+        feats["columnHeightsAvg"]    = columnHeightsAvg
+        feats["columnHeightsMax"]    = columnHeightsMax
+        feats["columnDifference"]    = columnDifference
+        feats["rowEliminated"]       = rowEliminated
+        feats["rowEliminatedSquare"] = rowEliminatedSquare
         return feats
 
     def get_q_value(self, state, action):
