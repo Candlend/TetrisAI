@@ -246,7 +246,7 @@ class PlayField:
             self.cur_tetromino.take_op(op, kick)
             blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
             pygame.display.flip()
-            sleep(max(0.0, 0.03333333333 - (time() - start)))
+            #sleep(max(0.0, 0.03333333333 - (time() - start)))
 
         # self.cur_tetromino.grid = action.grid
         # self.cur_tetromino.rotation = action.rotation
@@ -567,9 +567,12 @@ def blit_stats_constants():
 
 
 def quit_game():
-    agent.quit()
-    pygame.quit()
-    sys.exit()
+    if True:
+        raise RuntimeError()
+    else:
+        agent.quit()
+        pygame.quit()
+        sys.exit()
 
 def play_game(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
@@ -699,4 +702,8 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
-    play_auto(grid, None)
+    while(True):
+        try:
+            play_auto(None, None)
+        except:
+            pass
