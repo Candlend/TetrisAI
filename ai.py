@@ -161,21 +161,22 @@ class TetrisAgent:
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
         maximumHeight = 0               # Maximum pile height: maxp hp, Prevents from having a big pile
 
-        # print(state.field.field)
         grid = helper.NormalizeGrid(state.field.field)
 
         # Get column transition
-        for i in range(len(grid)):
-            prev = -1
-            for j in range(len(grid[0])):
-                if j != 0:
-                    if prev != grid[i][j]:
-                        columnTransitions += 1
-                prev = grid[i][j]
+        columnTransitions = helper.GetRowTransition(grid)
 
-        grid = np.transpose(grid) 
+        grid = np.transpose(grid)
+
+        #get row transition
+        rowTransitions = helper.GetRowTransition(grid)
+
+        #get holes & hole depth & rows with holes
         reachableIdentifier = helper.DyeingAlgorithm(grid)
-        
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if reachableIdentifier[]
+                prev = grid[i][j]
 
                     
 
@@ -253,10 +254,23 @@ class TetrisAgent:
         res = []
         while not q.isEmpty():
             cur = q.pop()
-            if not state.test_array(cur, (0, 1)) and state.test_array(cur):
+
+            length = cur.length
+            grid = cur.grid
+            all_overflow = True
+            for x in range(length):
+                for y in range(length):
+                    if grid[x][y] == 1:
+                        if cur.pos[1] + y >= 0:
+                            all_overflow = False
+                            break
+                if not all_overflow:
+                    break
+
+            if not state.test_array(cur, (0, 1)) and not all_overflow:
                 action = Action(cur)
                 res.append(action)
-                
+
             # expand new node
             for op in ops:
                 tmp = copy.deepcopy(cur)
@@ -269,6 +283,7 @@ class TetrisAgent:
                 tmp.take_op(op, kick)
                 tmp_x, tmp_y = tmp.get_pos()
                 p = (tmp_x, tmp_y, tmp.rotation)
+
                 if state.test_array(tmp) and p not in close_set:
                     q.push(tmp)
                     close_set.add(p)
