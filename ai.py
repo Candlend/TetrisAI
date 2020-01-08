@@ -124,8 +124,8 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.04
-        self.epsilon = 0.5
+        self.alpha = 0.004
+        self.epsilon = 0.2
         self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
@@ -177,7 +177,7 @@ class TetrisAgent:
         holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
         # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
-        rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
+        rowsWithHoles = 0               # counts the number of rows having at sdleast one hole (two holes on the same row count for only one)
         columnHeightsAvg = 0            # Average Height of the p columns of the board
         columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
