@@ -6,3 +6,4 @@ __pycache__/
 test.py
 settings/weights.txt
 temp.txt
+settings/score.csv

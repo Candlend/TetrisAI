@@ -24,6 +24,7 @@ class GameState:
         self.total_score = self.field.total_score
         self.next_pieces = self.field.next_pieces
         self.cur_tetromino = self.field.cur_tetromino
+        self.legal_actions = field.legal_actions
 
     def update(self):
         self.grid = self.field.field
@@ -143,7 +144,6 @@ class TetrisAgent:
             lines.append(key + " " + str(value) + "\n")
         weight_file.writelines(lines)
         weight_file.close()
-        print("3")
 
     def get_weights(self):
         return self.weights
@@ -248,17 +248,17 @@ class TetrisAgent:
         # print("columnHeightsMax", columnHeightsMax)
         # print("columnDifference", columnDifference)
 
-        feats["landingHeight"]       = landingHeight
-        feats["rowTransitions"]      = rowTransitions
-        feats["columnTransitions"]   = columnTransitions
-        feats["holes"]               = holes
-        feats["holeDepth"]           = holeDepth
-        feats["rowsWithHoles"]       = rowsWithHoles
-        # feats["columnHeightsAvg"]    = columnHeightsAvg
-        # feats["columnHeightsMax"]    = columnHeightsMax
-        # feats["columnDifference"]    = columnDifference
-        feats["rowEliminated"]       = rowEliminated
-        feats["rowEliminatedSquare"] = rowEliminatedSquare
+        feats["landingHeight"]       = -landingHeight
+        feats["rowTransitions"]      = -rowTransitions
+        feats["columnTransitions"]   = -columnTransitions
+        feats["holes"]               = -holes
+        feats["holeDepth"]           = -holeDepth
+        feats["rowsWithHoles"]       = -rowsWithHoles
+        feats["columnHeightsAvg"]    = -columnHeightsAvg
+        feats["columnHeightsMax"]    = -columnHeightsMax
+        feats["columnDifference"]    = -columnDifference
+        feats["rowEliminated"]       = -rowEliminated
+        feats["rowEliminatedSquare"] = -rowEliminatedSquare
         return feats
 
     def get_q_value(self, state, action):
@@ -326,48 +326,4 @@ class TetrisAgent:
         return False
 
     def get_legal_actions(self, state):
-        ops = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
-        tet = state.cur_tetromino
-        _tet = tet.type
-        grid, _pos = tet.spawn_tet()
-        q = util.Queue()
-        close_set = set()
-        q.push(tet)
-        close_set.add((_pos[0], _pos[1], tet.rotation))
-        res = []
-        while not q.isEmpty():
-            cur = q.pop()
-
-            length = cur.length
-            grid = cur.grid
-            all_overflow = True
-            for x in range(length):
-                for y in range(length):
-                    if grid[x][y] == 1:
-                        if cur.pos[1] + y >= 0:
-                            all_overflow = False
-                            break
-                if not all_overflow:
-                    break
-
-            if not state.test_array(cur, (0, 1)) and not all_overflow:
-                action = Action(cur)
-                res.append(action)
-
-            # expand new node
-            for op in ops:
-                tmp = copy.deepcopy(cur)
-                kick = None
-                if op == 3:
-                    kick = state.test_rotate_left(tmp)
-                if op == 4:
-                    kick = state.test_rotate_right(tmp)
-                tmp.moving.append((op, kick))
-                tmp.take_op(op, kick)
-                tmp_x, tmp_y = tmp.get_pos()
-                p = (tmp_x, tmp_y, tmp.rotation)
-
-                if state.test_array(tmp) and p not in close_set:
-                    q.push(tmp)
-                    close_set.add(p)
-        return res
+        return state.legal_actions
