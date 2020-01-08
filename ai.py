@@ -2,7 +2,8 @@ import random
 import util
 import pygame
 import copy
-import matrix_hash
+import numpy as np
+import helper
 
 class Action:
     def __init__(self, tet):
@@ -128,76 +129,40 @@ class TetrisAgent:
     def get_weights(self):
         return self.weights
 
-    def get_Tspin_struct(self, state):
-        Tspin_struct = [
-            [
-                [0,1],
-                [0,0],
-                [0,1]
-            ],
-            [
-                [0,1],
-                [0,0],
-                [0,1],
-                [1,1]
-            ]
-            [
-                [1,1],
-                [0,1],
-                [0,0],
-                [0,1]
-            ],
-            [
-                [1,1],
-                [0,1],
-                [0,0],
-                [0,1],
-                [1,1]
-            ],
-            [
-                [0,1,1],
-                [0,0,1],
-                [0,0,0],
-                [0,0,1],
-                [0,1,1]
-            ],
-            [
-                [0,1,1],
-                [0,0,1],
-                [0,0,0],
-                [0,0,1],
-                [1,1,1]
-            ],
-            [
-                [1,1,1],
-                [0,0,1],
-                [0,0,0],
-                [0,0,1],
-                [0,1,1]
-            ],
-            [
-                [1,1,1],
-                [0,0,1],
-                [0,0,0],
-                [0,0,1],
-                [1,1,1]
-            ]
-        ]
-        res = [0, 0, 0, 0]
-        res[0] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[0])
-        res[1] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[1]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[2])
-        res[2] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[3])
-        res[3] = matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[4]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[5]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[6]) + matrix_hash.matrix_find_cnt(state.grid, Tspin_struct[7])
-        return res
+
 
     def get_features(self, state, action):
         feats = util.Counter()
+
         landingHeight = action.pos[0]   # Height where the last piece is added, Prevents from increasing the pile height
         # erodedPieceCells              # (Number of rows eliminated in the last move) × (Number of bricks eliminated from the last piece added), Encourages to complete rows
         rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
         columnTransitions = 0           # Same thing for vertical transitions
-        Holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
+        holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
         # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+        holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
+        rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
+        columnHeight = 0                # Height of the pth column of the board, There are P such features where P is the board width
+        columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
+        maximumHeight = 0               # Maximum pile height: maxp hp, Prevents from having a big pile
+
+        print(state.field.field)
+        grid = helper.NormalizeGrid(state.field.field)
+
+        # Get column transition
+        for i in range(len(grid)):
+            prev = -1
+            for j in range(len(grid[0])):
+                if j != 0:
+                    if prev != grid[i][j]:
+                        columnTransitions += 1
+                prev = grid[i][j]
+
+        grid = np.transpose(grid) 
+        reachableIdentifier = helper.DyeingAlgorithm(grid)
+        
+
+                    
 
 
         return feats
