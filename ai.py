@@ -61,7 +61,7 @@ class GameState:
         length = tet.length
         grid = tet.grid
         coordinates = [tet.pos[0] + offset[0], tet.pos[1] + offset[1]]
-        all_overflow = True
+
         for x in range(length):
             for y in range(length):
                 if grid[x][y] == 1:
@@ -125,6 +125,21 @@ class TetrisAgent:
         self.discount = 0.5
         self.QValues = util.Counter()
         self.weights = util.Counter()
+        weight_file = open("settings/weights.txt", "r")
+        line = weight_file.readline()
+        while line:
+            weight = line.split()
+            self.weights[weight[0]] = eval(weight[1])
+            line = weight_file.readline()
+        weight_file.close()
+
+    def quit(self):
+        weight_file = open("settings/weights.txt", "w")
+        lines = []
+        for key, value in self.weights.items():
+            lines.append(key + " " + str(value))
+        weight_file.writelines(lines)
+        weight_file.close()
 
     def get_weights(self):
         return self.weights
