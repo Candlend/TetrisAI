@@ -61,7 +61,7 @@ class GameState:
         length = tet.length
         grid = tet.grid
         coordinates = [tet.pos[0] + offset[0], tet.pos[1] + offset[1]]
-
+        all_overflow = True
         for x in range(length):
             for y in range(length):
                 if grid[x][y] == 1:
@@ -239,10 +239,23 @@ class TetrisAgent:
         res = []
         while not q.isEmpty():
             cur = q.pop()
-            if not state.test_array(cur, (0, 1)) and state.test_array(cur):
+
+            length = cur.length
+            grid = cur.grid
+            all_overflow = True
+            for x in range(length):
+                for y in range(length):
+                    if grid[x][y] == 1:
+                        if cur.pos[1] + y >= 0:
+                            all_overflow = False
+                            break
+                if not all_overflow:
+                    break
+
+            if not state.test_array(cur, (0, 1)) and not all_overflow:
                 action = Action(cur)
                 res.append(action)
-                
+
             # expand new node
             for op in ops:
                 tmp = copy.deepcopy(cur)
@@ -255,6 +268,7 @@ class TetrisAgent:
                 tmp.take_op(op, kick)
                 tmp_x, tmp_y = tmp.get_pos()
                 p = (tmp_x, tmp_y, tmp.rotation)
+
                 if state.test_array(tmp) and p not in close_set:
                     q.push(tmp)
                     close_set.add(p)
