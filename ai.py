@@ -148,8 +148,8 @@ class TetrisAgent:
         return self.weights
 
     def get_next_grid(self, state, action):
-        field = state.field.field
-        overflow_field = state.field.overflow_field
+        field = state.field.field.copy()
+        overflow_field = state.field.overflow_field.copy()
         coordinates = action.pos
         length = len(action.grid)
 
@@ -181,9 +181,10 @@ class TetrisAgent:
         columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
 
-        (grid, overflow_grid) = get_next_grid(state, action)
+        (grid, overflow_grid) = self.get_next_grid(state, action)
         grid = helper.NormalizeGrid(grid)
-
+        # grid_origin = state.field.field
+        # grid = helper.NormalizeGrid(grid_origin)
         # Get column transition
         columnTransitions = helper.GetRowTransition(grid)
 
@@ -197,9 +198,9 @@ class TetrisAgent:
 
         columnHeightsSum = 0
         lastColumnHeight = -1
-        for c in range(len(grid_origin)):
+        for c in range(len(grid)):
             h = 0
-            for i, j in enumerate(grid_origin[c]):
+            for i, j in enumerate(grid[c]):
                 if j != 0:
                     h = 20 - i
                     break
@@ -211,7 +212,7 @@ class TetrisAgent:
             if h > columnHeightsMax:
                 columnHeightsMax = h
             columnHeightsSum += h
-        columnHeightsAvg = columnHeightsSum / len(grid_origin)
+        columnHeightsAvg = columnHeightsSum / len(grid)
 
         for i in range(len(grid)):
             rowHasHole = False
@@ -225,6 +226,17 @@ class TetrisAgent:
                                 holeDepth += (i - k - 1)
                                 break
             rowsWithHoles += rowHasHole
+
+
+        feats["landingHeight"]       = landingHeight
+        feats["rowTransitions"]      = rowTransitions
+        feats["columnTransitions"]   = columnTransitions
+        feats["holes"]               = holes        
+        feats["holeDepth"]           = holeDepth   
+        feats["rowsWithHoles"]       = rowsWithHoles 
+        feats["columnHeightsAvg"]    = columnHeightsAvg
+        feats["columnHeightsMax"]    = columnHeightsMax
+        feats["columnDifference"]    = columnDifference
 
         return feats
 
