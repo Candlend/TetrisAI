@@ -635,8 +635,9 @@ def blit_stats_constants():
 
 def quit_game():
     agent.quit()
-    pygame.quit()
-    sys.exit()
+    raise RuntimeError()
+    # pygame.quit()
+    # sys.exit()
 
 def play_game(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
@@ -769,4 +770,9 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
-    play_auto(None, None)
+    while(True):
+        try:
+            play_auto(None, None)
+        except Exception as e:
+            print(repr(e))
+            pass
