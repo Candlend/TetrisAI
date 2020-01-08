@@ -177,9 +177,9 @@ class TetrisAgent:
         # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
         rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
-        columnHeight = 0                # Height of the pth column of the board, There are P such features where P is the board width
+        columnHeightsAvg = 0            # Average Height of the p columns of the board
+        columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
-        maximumHeight = 0               # Maximum pile height: maxp hp, Prevents from having a big pile
 
         (grid, overflow_grid) = get_next_grid(state, action)
         grid = helper.NormalizeGrid(grid)
@@ -194,6 +194,25 @@ class TetrisAgent:
 
         #get holes & hole depth & rows with holes
         reachableIdentifier = helper.DyeingAlgorithm(grid)
+
+        columnHeightsSum = 0
+        lastColumnHeight = -1
+        for c in range(len(grid_origin)):
+            h = 0
+            for i, j in enumerate(grid_origin[c]):
+                if j != 0:
+                    h = 20 - i
+                    break
+            if lastColumnHeight == -1:
+                lastColumnHeight = h
+            else:
+                columnDifference += abs(h - lastColumnHeight)
+                lastColumnHeight = h
+            if h > columnHeightsMax:
+                columnHeightsMax = h
+            columnHeightsSum += h
+        columnHeightsAvg = columnHeightsSum / len(grid_origin)
+
         for i in range(len(grid)):
             rowHasHole = False
             for j in range(len(grid[0])):
@@ -206,12 +225,6 @@ class TetrisAgent:
                                 holeDepth += (i - k - 1)
                                 break
             rowsWithHoles += rowHasHole
-
-        
-                
-
-                    
-
 
         return feats
 
