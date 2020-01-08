@@ -227,7 +227,7 @@ class TetrisAgent:
         return False
 
     def get_legal_actions(self, state):
-        actions = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
+        ops = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
         tet = state.cur_tetromino
         _tet = tet.type
         grid, _pos = tet.spawn_tet()
@@ -243,17 +243,17 @@ class TetrisAgent:
                 res.append(action)
                 
             # expand new node
-            for action in actions:
+            for op in ops:
                 tmp = copy.deepcopy(cur)
-                kick = state.test_rotate_left(tmp)
-                if action == 3:
+                kick = None
+                if op == 3:
                     kick = state.test_rotate_left(tmp)
-                if action == 4:
+                if op == 4:
                     kick = state.test_rotate_right(tmp)
-                tmp.moving.append(action)
-                tmp.take_action(action, kick)
+                tmp.moving.append((op, kick))
+                tmp.take_op(op, kick)
                 tmp_x, tmp_y = tmp.get_pos()
-                p = (tmp_x, tmp_y, tet.rotation)
+                p = (tmp_x, tmp_y, tmp.rotation)
                 if state.test_array(tmp) and p not in close_set:
                     q.push(tmp)
                     close_set.add(p)

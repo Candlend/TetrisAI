@@ -239,10 +239,10 @@ class PlayField:
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
         self.cur_tetromino = Tetromino(action.tet_type)
-        for each in action.moving:
+        for op, kick in action.moving:
             start = time()
             blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.pos)
-            self.cur_tetromino.take_action(each)
+            self.cur_tetromino.take_op(op, kick)
             blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
             pygame.display.flip()
             sleep(max(0.0, 0.03333333333 - (time() - start)))
@@ -698,4 +698,4 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
-    play_auto(grid, next_pieces)
+    play_auto(grid, None)

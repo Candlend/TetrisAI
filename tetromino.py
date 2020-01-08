@@ -105,28 +105,28 @@ class Tetromino:
     def get_pos(self):
         return self.pos[0], self.pos[1]
 
-    def take_action(self, action, kick = None):
+    def take_op(self, op, kick = None):
         # 0: go down 1 grid
-        if action == 0:
+        if op == 0:
             self.pos[1] += 1
             return 
         # 1: go left
-        if action == 1:
+        if op == 1:
             self.pos[0] -= 1
             return 
         # 2: go right
-        if action == 2:
+        if op == 2:
             self.pos[0] += 1
             return
         # 3: turn left
-        if action == 3:
+        if op == 3:
             self.rotate("left")
             if kick != None:
                 self.pos[0] += kick[0]
                 self.pos[1] += kick[1]
             return 
         # 4: turn right
-        if action == 4:
+        if op == 4:
             self.rotate("right")
             if kick != None:
                 self.pos[0] += kick[0]
@@ -134,7 +134,7 @@ class Tetromino:
             return 
 
         # 5: turn down
-        if action == 5:
+        if op == 5:
             self.rotate('double')
             return 
         return
