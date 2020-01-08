@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.004
+        self.alpha = 0.01
         self.epsilon = 0.2
         self.discount = 0.8
         self.QValues = util.Counter()
@@ -283,7 +283,7 @@ class TetrisAgent:
         print(self.alpha, diff)
         for feature, value in features.items():
             print("===", feature, value, "===")
-            self.weights[feature] += self.alpha * diff * value
+            self.weights[feature] += self.alpha * diff * value * value * value
 
     def get_policy(self, state, legal_actions):
         max_value = - float("inf")
