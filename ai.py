@@ -231,7 +231,6 @@ class TetrisAgent:
                                 break
             rowsWithHoles += rowHasHole
 
-        print(grid)
         # get row eliminated
         for i in range(len(grid)):
             if (0 not in grid[i]):
@@ -266,15 +265,12 @@ class TetrisAgent:
         self.update(state, action, next_state, reward)
 
     def update(self, state, action, next_state, reward):
-        print("==================")
 
         features = self.get_features(state, action)
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
         m = 0
-        print(self.alpha, diff)
 
         for feature, value in features.items():
-            print("===", feature, value, "===")
             self.weights[feature] += self.alpha * diff * value
             m += self.weights[feature] ** 2
         m = math.sqrt(m)
