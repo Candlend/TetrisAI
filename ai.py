@@ -5,11 +5,12 @@ import copy
 
 
 class Action:
-    def __init__(self, tet_type, pos, rotation, grid):
-        self.tet_type = tet_type
-        self.pos = pos
-        self.rotation = rotation
-        self.grid = grid
+    def __init__(self, tet):
+        self.tet_type = tet.type
+        self.pos = tet.pos
+        self.rotation = tet.rotation
+        self.grid = tet.grid
+        self.moving = tet.moving
 
 
 class GameState:
@@ -123,13 +124,21 @@ class TetrisAgent:
         self.discount = 0.5
         self.QValues = util.Counter()
         self.weights = util.Counter()
-        self.feats = util.Counter()
 
     def get_weights(self):
         return self.weights
 
     def get_features(self, state, action):
-        return self.feats
+        feats = util.Counter()
+        landingHeight = action.pos[0]   # Height where the last piece is added, Prevents from increasing the pile height
+        # erodedPieceCells              # (Number of rows eliminated in the last move) × (Number of bricks eliminated from the last piece added), Encourages to complete rows
+        rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
+        columnTransitions = 0           # Same thing for vertical transitions
+        Holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
+        # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+
+
+        return feats
 
     def get_q_value(self, state, action):
         sum_value = 0
@@ -181,14 +190,12 @@ class TetrisAgent:
         x, y = tetromino.get_pos()
         if x < 0 or x >= 10:
             return True
-        if y < 0:
-            return False
         for i in range(tetromino.size):
             for j in range(tetromino.size):
                 # print(x,y,i,j)
-                if tetromino.grid[i][j] > 0 and (y + j >= 20
-                 or x + i >= 10 or x + i < 0
-                 or state.grid[x + i][y + j] > 0):
+                if y + j < 0:
+                    continue
+                if tetromino.grid[i][j] > 0 and (y + j >= 20 or x + i >= 10 or x + i < 0 or state.grid[x + i][y + j] > 0):
                     return True
         return False
 
@@ -205,7 +212,7 @@ class TetrisAgent:
         while not q.isEmpty():
             cur = q.pop()
             if not state.test_array(cur, (0, 1)) and state.test_array(cur):
-                action = Action(cur.type, cur.pos, cur.rotation, cur.grid)
+                action = Action(cur)
                 res.append(action)
                 
             # expand new node
@@ -216,6 +223,7 @@ class TetrisAgent:
                     kick = state.test_rotate_left(tmp)
                 if action == 4:
                     kick = state.test_rotate_right(tmp)
+                tmp.moving.append(action)
                 tmp.take_action(action, kick)
                 tmp_x, tmp_y = tmp.get_pos()
                 p = (tmp_x, tmp_y, tet.rotation)
