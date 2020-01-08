@@ -175,7 +175,8 @@ class TetrisAgent:
         rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
         columnTransitions = 0           # Same thing for vertical transitions
         holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
-        # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+        boardWells = 0                  # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+        wellDepth = 0
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
         rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
         columnHeightsAvg = 0            # Average Height of the p columns of the board
@@ -189,17 +190,37 @@ class TetrisAgent:
         grid = helper.NormalizeGrid(grid_origin)
         # grid_origin = state.field.field
         # grid = helper.NormalizeGrid(grid_origin)
+
         # Get column transition
         columnTransitions = helper.GetRowTransition(grid)
 
         grid = np.transpose(grid)
 
-        #get row transition
+        # get row transition
         rowTransitions = helper.GetRowTransition(grid)
 
-        #get holes & hole depth & rows with holes
+        # get holes & hole depth & rows with holes
         reachableIdentifier = helper.DyeingAlgorithm(grid)
 
+        for i in range(len(grid)):
+            rowHasHole = False
+            for j in range(len(grid[0])):
+                if reachableIdentifier[i][j] == 1:
+                    if grid[i][j] == 0:
+                        rowHasHole = True
+                        holes += 1
+                        for k in range(len(grid)):
+                            if reachableIdentifier[k][j] == 0:
+                                holeDepth += (i - k)
+                                break
+            rowsWithHoles += rowHasHole
+        
+        # get well depth
+        for i in range(len(grid)):
+            rowHasHole = False
+            for j in range(len(grid[0])):
+        
+        # get column height avg, max, difference
         columnHeightsSum = 0
         lastColumnHeight = -1
         for c in range(len(grid_origin)):
@@ -217,19 +238,6 @@ class TetrisAgent:
                 columnHeightsMax = h
             columnHeightsSum += h
         columnHeightsAvg = columnHeightsSum / len(grid)
-
-        for i in range(len(grid)):
-            rowHasHole = False
-            for j in range(len(grid[0])):
-                if reachableIdentifier[i][j] == 1:
-                    if grid[i][j] == 0:
-                        rowHasHole = True
-                        holes += 1
-                        for k in range(len(grid) - 1, -1, -1):
-                            if reachableIdentifier[k][j] == 0:
-                                holeDepth += (i - k - 1)
-                                break
-            rowsWithHoles += rowHasHole
 
         # get row eliminated
         for i in range(len(grid)):
