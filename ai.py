@@ -4,7 +4,7 @@ import pygame
 import copy
 import numpy as np
 import helper
-
+import math
 
 tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
 
@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.004
+        self.alpha = 0.4
         self.epsilon = 0.2
         self.discount = 0.8
         self.QValues = util.Counter()
@@ -257,8 +257,14 @@ class TetrisAgent:
     def update(self, state, action, next_state, reward):
         features = self.get_features(state, action)
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
+        m = 0
         for feature, value in features.items():
             self.weights[feature] += self.alpha * diff * value
+            m += self.weights[feature] ** 2
+        m = math.sqrt(m)
+        for feature, value in features.items():
+            self.weights[feature] /= m
+
 
     def get_policy(self, state, legal_actions):
         max_value = - float("inf")
