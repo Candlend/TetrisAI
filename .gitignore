@@ -5,4 +5,5 @@ __pycache__/
 .vscode/
 test.py
 settings/weights.txt
+temp.txt
 settings/score.csv
