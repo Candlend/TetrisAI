@@ -201,6 +201,7 @@ class TetrisAgent:
         rowEliminated = 0               # Row eliminated in the move
         rowEliminatedSquare = 0         # squre of rowEliminted
         # blockEliminated = 0
+        tSpinStruct = 0
 
         (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
         grid = helper.NormalizeGrid(grid_origin)
@@ -273,6 +274,8 @@ class TetrisAgent:
 
         rowEliminatedSquare = rowEliminated ** 2
 
+        tSpinStruct = helper.get_Tspin_struct(grid)
+
         feats["landingHeight"]       = landingHeight
         feats["rowTransitions"]      = rowTransitions
         feats["columnTransitions"]   = columnTransitions
@@ -287,6 +290,7 @@ class TetrisAgent:
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
         feats["rowEliminatedSquare"] = rowEliminatedSquare
+        feats["tSpinStruct"]         = tSpinStruct
 
         return feats
 
