@@ -125,8 +125,8 @@ class GameState:
 class TetrisAgent:
     def __init__(self, **args):
         self.alpha = 0.4
-        self.epsilon = 0.2
-        self.discount = 0.7
+        self.epsilon = 0.4
+        self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
         weight_file = open("settings/weights.txt", "r")
@@ -231,22 +231,12 @@ class TetrisAgent:
                                 break
             rowsWithHoles += rowHasHole
 
+        print(grid)
         # get row eliminated
         for i in range(len(grid)):
-            if 0 not in grid[i]:
+            if (0 not in grid[i]):
                 rowEliminated += 100
         rowEliminatedSquare = rowEliminated ** 2
-
-        # print("==================================")
-        # print("landingHeight", landingHeight)
-        # print("rowTransitions", rowTransitions)
-        # print("columnTransitions", columnTransitions)
-        # print("holes", holes)
-        # print("holeDepth", holeDepth)
-        # print("rowsWithHoles", rowsWithHoles )
-        # print("columnHeightsAvg", columnHeightsAvg)
-        # print("columnHeightsMax", columnHeightsMax)
-        # print("columnDifference", columnDifference)
 
         feats["landingHeight"]       = landingHeight
         feats["rowTransitions"]      = rowTransitions
@@ -282,9 +272,6 @@ class TetrisAgent:
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
         m = 0
         print(self.alpha, diff)
-        
-        nbkey = list(features.keys())[0]
-        nobias = self.weights[nbkey]
 
         for feature, value in features.items():
             print("===", feature, value, "===")
@@ -293,10 +280,6 @@ class TetrisAgent:
         m = math.sqrt(m)
         for feature, value in features.items():
             self.weights[feature] /= m
-
-
-        for feature in features.keys():
-            self.weights[feature] = self.weights[feature]/nobias
 
         print(self.weights)
 
