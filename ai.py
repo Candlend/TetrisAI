@@ -146,21 +146,22 @@ class TetrisAgent:
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
         maximumHeight = 0               # Maximum pile height: maxp hp, Prevents from having a big pile
 
-        print(state.field.field)
         grid = helper.NormalizeGrid(state.field.field)
 
         # Get column transition
-        for i in range(len(grid)):
-            prev = -1
-            for j in range(len(grid[0])):
-                if j != 0:
-                    if prev != grid[i][j]:
-                        columnTransitions += 1
-                prev = grid[i][j]
+        columnTransitions = helper.GetRowTransition(grid)
 
-        grid = np.transpose(grid) 
+        grid = np.transpose(grid)
+
+        #get row transition
+        rowTransitions = helper.GetRowTransition(grid)
+
+        #get holes & hole depth & rows with holes
         reachableIdentifier = helper.DyeingAlgorithm(grid)
-        
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if reachableIdentifier[]
+                prev = grid[i][j]
 
                     
 
