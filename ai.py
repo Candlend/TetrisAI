@@ -170,14 +170,14 @@ class TetrisAgent:
     def get_features(self, state, action):
         feats = util.Counter()
 
-        landingHeight = action.pos[0]   # Height where the last piece is added, Prevents from increasing the pile height
+        landingHeight = 20 - action.pos[1]# Height where the last piece is added, Prevents from increasing the pile height
         # erodedPieceCells              # (Number of rows eliminated in the last move) × (Number of bricks eliminated from the last piece added), Encourages to complete rows
         rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
         columnTransitions = 0           # Same thing for vertical transitions
         holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
         # boardWells = 0                # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
-        rowsWithHoles = 0               # counts the number of rows having at sdleast one hole (two holes on the same row count for only one)
+        rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
         columnHeightsAvg = 0            # Average Height of the p columns of the board
         columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
@@ -185,9 +185,10 @@ class TetrisAgent:
         rowEliminatedSquare = 0         # squre of rowEliminted
         # blockEliminated = 0
 
-        (grid, overflow_grid) = self.get_next_grid(state, action)
-        grid = helper.NormalizeGrid(grid)
-
+        (grid_origin, overflow_grid) = self.get_next_grid(state, action)
+        grid = helper.NormalizeGrid(grid_origin)
+        # grid_origin = state.field.field
+        # grid = helper.NormalizeGrid(grid_origin)
         # Get column transition
         columnTransitions = helper.GetRowTransition(grid)
 
@@ -201,9 +202,9 @@ class TetrisAgent:
 
         columnHeightsSum = 0
         lastColumnHeight = -1
-        for c in range(len(grid)):
+        for c in range(len(grid_origin)):
             h = 0
-            for i, j in enumerate(grid[c]):
+            for i, j in enumerate(grid_origin[c]):
                 if j != 0:
                     h = 20 - i
                     break
@@ -237,19 +238,6 @@ class TetrisAgent:
         rowEliminated += 1
 
         rowEliminatedSquare = rowEliminated ** 2
-        if rowEliminated != 0:
-            print(rowEliminated, "!!!!")
-
-        # print("==================================")
-        # print("landingHeight", landingHeight)
-        # print("rowTransitions", rowTransitions)
-        # print("columnTransitions", columnTransitions)
-        # print("holes", holes)
-        # print("holeDepth", holeDepth)
-        # print("rowsWithHoles", rowsWithHoles )
-        # print("columnHeightsAvg", columnHeightsAvg)
-        # print("columnHeightsMax", columnHeightsMax)
-        # print("columnDifference", columnDifference)
 
         feats["landingHeight"]       = landingHeight
         feats["rowTransitions"]      = rowTransitions
@@ -279,14 +267,12 @@ class TetrisAgent:
         self.update(state, action, next_state, reward)
 
     def update(self, state, action, next_state, reward):
-        print("==================")
 
         features = self.get_features(state, action)
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
         m = 0
-        print(self.alpha, diff)
+
         for feature, value in features.items():
-            # print("===", feature, value, "===")
             self.weights[feature] += self.alpha * diff * value
             m += self.weights[feature] ** 2
         m = math.sqrt(m)
