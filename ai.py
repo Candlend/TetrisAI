@@ -150,11 +150,22 @@ class TetrisAgent:
 
     def get_next_grid(self, state, action):
         field = state.field.field.copy()
+        grid = action.grid
         overflow_field = state.field.overflow_field.copy()
         coordinates = action.pos
         length = len(action.grid)
 
         removed_lines = 0
+
+        for y in range(length):
+            for x in range(length):
+                if grid[x][y] > 0:
+                    if coordinates[1] + y >= 0:
+                        field[coordinates[0] + x][coordinates[1] + y] = tetrominoes.index(
+                            action.tet_type) + 1  # +1 because zero is blank in field
+                    else:
+                        overflow_field[coordinates[0] + x][coordinates[1] + y + 20] = tetrominoes.index(
+                            action.tet_type) + 1
 
         for y in range(length):
             if 0 <= y + coordinates[1] <= 19:
@@ -168,7 +179,6 @@ class TetrisAgent:
                 if 0 not in line:
                     overflow_field = np.insert(np.delete(overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
                     removed_lines += 1
-
         return field, overflow_field, removed_lines
 
 
@@ -278,9 +288,6 @@ class TetrisAgent:
         feats["rowEliminated"]       = rowEliminated
         feats["rowEliminatedSquare"] = rowEliminatedSquare
 
-
-        print("rowEliminated", rowEliminated)
-        print("rowEliminatedSquare", rowEliminatedSquare)
         return feats
 
 
