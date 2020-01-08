@@ -377,8 +377,6 @@ class PlayField:
         else:
             self.combo = 0
         self.update_score(score)
-        print("combo: ", self.combo)
-        print("=============")
 
         return removed_lines
 
