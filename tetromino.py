@@ -7,7 +7,7 @@ class Tetromino:
         self.length = len(self.grid)
         self.rotation = 0  # 0 is default, 1 is right, 2 is double, 3 is left
         self.ghost_pos = [0, 0]
-        self.moving = util.Queue()
+        self.moving = []
         self.size = 0
 
     def spawn_tet(self):
