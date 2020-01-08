@@ -20,11 +20,11 @@ class PlayField:
         self.score_pos_y = 32 * 4
         self.garbage_probs = [0.01, 0.01, 0.01, 0.001, 0.001]
         if grid is None:
-            self.field = [[0 for _ in range(20)] for _ in range(10)]
+            self.field = np.zeros((10, 20), dtype=int)
         else:
             self.field = np.transpose(grid)
 
-        self.overflow_field = [[0 for _ in range(20)] for _ in range(10)]
+        self.overflow_field = np.zeros((10, 20), dtype=int)
 
         self.fall_delay = 15  # every 15 frames at 30fps
         self.block_delay = 30
@@ -53,7 +53,7 @@ class PlayField:
             self.next_pieces.extend(make_bag())
             self.next_pieces.extend(make_bag())
         else:
-            self.next_pieces = next_pieces
+            self.next_pieces = next_pieces.copy()
 
         self.cur_tetromino = None
 
@@ -65,6 +65,52 @@ class PlayField:
         self.update_score()
         self.reblit_field()
 
+    def try_move_left(self):
+        if self.test_array(offset=[-1, 0]):
+            self.cur_tetromino.pos[0] -= 1
+            return True
+        return False
+
+    def try_move_right(self):
+        if self.test_array(offset=[1, 0]):
+            self.cur_tetromino.pos[0] += 1
+            return True
+        return False
+
+    def try_rotate_left(self):
+        self.cur_tetromino.rotate('left')
+        if not self.test_array():  # rotates into block - do kick stuff
+            kick = self.test_srs('left')
+            if kick != 0:
+                self.cur_tetromino.pos[0] += kick[0]
+                self.cur_tetromino.pos[1] += kick[1]
+                return True
+            else:  # kick fails, so rotate back
+                self.cur_tetromino.rotate('right')
+                return False
+        else:
+            return True
+
+    def try_rotate_right(self):
+        self.cur_tetromino.rotate('right')
+        if not self.test_array():  # rotates into block - do kick stuff
+            kick = self.test_srs('right')
+            if kick != 0:
+                self.cur_tetromino.pos[0] += kick[0]
+                self.cur_tetromino.pos[1] += kick[1]
+                return True
+            else:  # kick fails, so rotate back
+                self.cur_tetromino.rotate('left')
+                return False
+        else:
+            return True
+
+    def try_soft_drop(self):
+        if not self.test_array(offset=[0, 1]):  # if below are pieces - then place at current pos.
+            self.cur_tetromino.pos[1] += 1
+            return True
+        return False
+        
     def advance_frame(self, presses):
         if self.cur_tetromino.ghost_pos != [None, None]:
             blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.ghost_pos)
@@ -137,36 +183,11 @@ class PlayField:
                     screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
                     break  # out of presses loop
                 elif press == buttons[0]:  # rotate left
-                    self.cur_tetromino.rotate('left')
-                    if not self.test_array():  # rotates into block - do kick stuff
-                        kick = self.test_srs('left')
-                        if kick != 0:
-                            self.cur_tetromino.pos[0] += kick[0]
-                            self.cur_tetromino.pos[1] += kick[1]
-
-                            self.cur_tetromino.rotation = (
-                                                                      self.cur_tetromino.rotation - 1) % 4  # can wrap around back to 3
-                        else:  # kick fails, so rotate back
-                            self.cur_tetromino.rotate('right')
-                    else:
-                        self.cur_tetromino.rotation = (self.cur_tetromino.rotation - 1) % 4
+                    self.try_rotate_left()
                 elif press == buttons[5]:  # hard drop
                     self.placed_piece = True
                 elif press == buttons[2]:  # rotate right
-                    self.cur_tetromino.rotate('right')
-                    if not self.test_array():  # rotates into block - do kick stuff
-                        kick = self.test_srs('right')
-                        if kick != 0:
-                            self.cur_tetromino.pos[0] += kick[0]
-                            self.cur_tetromino.pos[1] += kick[1]
-
-                            self.cur_tetromino.rotation = (
-                                                                      self.cur_tetromino.rotation + 1) % 4  # can wrap around back to 0
-                        else:  # kick fails, so rotate back
-                            self.cur_tetromino.rotate('left')
-                    else:
-                        self.cur_tetromino.rotation = (self.cur_tetromino.rotation + 1) % 4
-
+                    self.try_rotate_right()
         if not self.placed_piece and buttons[3] not in presses:
             if self.fall_delay_timer > 0:
                 self.fall_delay_timer -= 1
@@ -264,9 +285,8 @@ class PlayField:
                     line.append(self.field[x][y + coordinates[1]])
                 if 0 not in line:
                     for i in range(10):
-                        self.field[i] = np.delete(self.field[i], y + coordinates[1])
-                        self.field[i] = np.insert(self.field[i], 0, self.overflow_field[i].pop(19))
-                        self.overflow_field[i].insert(0, 0)
+                        self.field[i] = np.insert(np.delete(self.field[i], y + coordinates[1]), 0, self.overflow_field[i][19])
+                        self.overflow_field[i] = np.insert(np.delete(self.overflow_field[i], 19), 0, 0)
                     removed_lines = True
                     self.update_score(10)
             elif 0 > y + coordinates[1]:
@@ -274,8 +294,7 @@ class PlayField:
                     line.append(self.overflow_field[x][y + coordinates[1] + 20])
                 if 0 not in line:
                     for i in range(10):
-                        self.overflow_field[i].pop(y + coordinates[1] + 20)
-                        self.overflow_field[i].insert(0, 0)  # rewrite
+                        self.overflow_field[i] = np.insert(np.delete(self.overflow_field[i], y + coordinates[1] + 20), 0, 0)
                     removed_lines = True
                     self.update_score(10)
         return removed_lines
@@ -339,16 +358,15 @@ class PlayField:
         return True
 
     def test_srs(self, direction):
-
         length = self.cur_tetromino.length
-        old_rotation = self.cur_tetromino.rotation
-        new_rotation = 0
+        new_rotation = self.cur_tetromino.rotation
+        old_rotation = 0
         if direction == 'right':
-            new_rotation = (old_rotation + 1) % 4
+            old_rotation = (new_rotation - 1) % 4
         elif direction == 'left':
-            new_rotation = (old_rotation - 1) % 4
+            old_rotation = (new_rotation + 1) % 4
         elif direction == 'double':
-            new_rotation = (old_rotation + 2) % 4
+            old_rotation = (new_rotation - 2) % 4
         tests = []
 
         if length == 3:  # sztlj
@@ -535,16 +553,17 @@ def quit_game():
     pygame.quit()
     sys.exit()
 
-
-def play_game():
+def play_game(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
     pygame.display.flip()
+
     frame = 0
-    field = PlayField([32 * 2, 0], None, None)
+    field = PlayField([32 * 2, 0], grid, next_pieces)
     field.blit_previews()
     blit_stats_constants()
     game_intro()
     field.new_piece()
+    field.reblit_field()
     game_start_time = time()
     while True:
         start = time()
@@ -553,11 +572,12 @@ def play_game():
         if buttons[7] in presses and time() - game_start_time > 0.1:  # reset
             frame = 0
             screen.fill((0, 0, 0))
-            field = PlayField([32 * 2, 0], None, None)
+            field = PlayField([32 * 2, 0], grid, next_pieces)
             field.blit_previews()
             blit_stats_constants()
             game_intro()
             field.new_piece()
+            field.reblit_field()
             game_start_time = time()
             start = time()
             presses = test_for_presses()
@@ -581,39 +601,13 @@ def play_game():
         sleep(max(0.0, 0.03333333333 - (time() - start)))
 
 
-def play_auto():
-    grid = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]
-
-    next_pieces = ['s', 'z', 'j', 'l', 't', 'o', 'i', 's', 'z', 'j', 'l', 't', 'o', 'i']
-
+def play_auto(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
     pygame.display.flip()
     frame = 0
     field = PlayField([32 * 2, 0], grid, next_pieces)
     field.blit_previews()
     blit_stats_constants()
-    game_intro()
     field.new_piece()
     game_start_time = time()
     agent = TetrisAgent()
@@ -659,5 +653,32 @@ if __name__ == '__main__':
     for n in range(0, 8):
         buttons.append(f.readline().split()[0])
 
-    # play_game()
-    play_auto()
+
+    # T-spin debug
+    grid = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 8, 0, 0, 8, 8, 0, 0],
+        [0, 0, 0, 8, 0, 0, 0, 8, 0, 0],
+        [0, 0, 0, 8, 8, 0, 8, 8, 0, 0],
+        [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
+        [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
+        [0, 0, 0, 0, 8, 8, 8, 0, 0, 0],
+        [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
+        [8, 8, 0, 0, 8, 8, 8, 0, 0, 8],
+        [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
+        [8, 8, 0, 8, 8, 8, 8, 0, 0, 8],
+    ]
+
+    next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 'j', 'l', 't', 'o', 'i']
+
+    play_game(grid, next_pieces)
+    # play_auto()
