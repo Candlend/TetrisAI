@@ -42,7 +42,6 @@ def GetRowTransition(grid):
     trans = 0
     for i in range(len(grid)):
         prev = -1
-        print("trans:", trans)
         for j in range(len(grid[0])):
             if j != 0:
                 if prev != grid[i][j]:
