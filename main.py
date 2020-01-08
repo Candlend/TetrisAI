@@ -7,6 +7,8 @@ from keyboard import is_pressed
 from ai import Action, GameState, TetrisAgent
 from tetromino import Tetromino
 import numpy as np
+import copy
+import util
 
 # 0, 0 is TOP LEFT FOR BLITTING - REMEMBER
 # piece order - 0S, 1Z, 2J, 3L, 4T, 5O, 6I, 7Garbage
@@ -49,7 +51,7 @@ class PlayField:
         self.old_presses = []
         self.presses = []
         self.placed_piece = False
-
+        self.legal_actions = []
         if next_pieces is None:
             self.next_pieces = []
             self.next_pieces.extend(make_bag())
@@ -234,10 +236,6 @@ class PlayField:
                 quit_game()  # end by spawn overlap
 
     def take_action(self, action):
-        if action is None:
-            self.update_score(-10000)
-            print("No legal action!")
-            return False
         self.blit_previews()
         if action.tet_type != self.cur_tetromino.type:
             if self.hold_tet != '':
@@ -272,11 +270,64 @@ class PlayField:
         self.new_piece()
         self.rand_add_garbage()
 
-        if not self.test_array():
+        self.set_legal_actions()
+        if len(self.legal_actions) == 0:
             self.update_score(-10000)
-            print("Overlap!")
+            print("No legal actions!")
             return False
+
         return True
+
+    def set_legal_actions(self):
+        state = GameState(self)
+        ops = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
+        tet = state.cur_tetromino
+        _tet = tet.type
+        grid, _pos = tet.spawn_tet()
+        if not state.test_array(tet):
+            self.legal_actions = []
+            return
+        q = util.Queue()
+        close_set = set()
+        q.push(tet)
+        close_set.add((_pos[0], _pos[1], tet.rotation))
+        res = []
+        while not q.isEmpty():
+            cur = q.pop()
+
+            length = cur.length
+            grid = cur.grid
+            all_overflow = True
+            for x in range(length):
+                for y in range(length):
+                    if grid[x][y] == 1:
+                        if cur.pos[1] + y >= 0:
+                            all_overflow = False
+                            break
+                if not all_overflow:
+                    break
+
+            if not state.test_array(cur, (0, 1)) and not all_overflow:
+                action = Action(cur)
+                res.append(action)
+
+            # expand new node
+            for op in ops:
+                tmp = copy.deepcopy(cur)
+                kick = None
+                if op == 3:
+                    kick = state.test_rotate_left(tmp)
+                if op == 4:
+                    kick = state.test_rotate_right(tmp)
+                tmp.moving.append((op, kick))
+                tmp.take_op(op, kick)
+                tmp_x, tmp_y = tmp.get_pos()
+                p = (tmp_x, tmp_y, tmp.rotation)
+
+                if state.test_array(tmp) and p not in close_set:
+                    q.push(tmp)
+                    close_set.add(p)
+        self.legal_actions = res
 
     def reblit_field(self):
         screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
@@ -583,8 +634,8 @@ def blit_stats_constants():
 
 
 def quit_game():
-    print("1")
     agent.quit()
+<<<<<<< HEAD
     if True:
         print("2")
 
@@ -592,6 +643,10 @@ def quit_game():
     else:
         pygame.quit()
         sys.exit(10)
+=======
+    pygame.quit()
+    sys.exit()
+>>>>>>> 1a097c17d2034274e47b31175305fb76f7ab57ab
 
 def play_game(grid = None, next_pieces = None):
     screen.fill((0, 0, 0))
@@ -646,9 +701,10 @@ def play_auto(grid = None, next_pieces = None):
     pygame.display.flip()
     frame = 0
     field = PlayField([32 * 2, 0], grid, next_pieces)
+    field.new_piece()
+    field.set_legal_actions()
     field.blit_previews()
     blit_stats_constants()
-    field.new_piece()
     game_start_time = time()
     seconds = 0
     screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
@@ -723,6 +779,7 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
+<<<<<<< HEAD
     # while(True):
     #     try:
     #         play_auto(None, None)
@@ -730,4 +787,6 @@ if __name__ == '__main__':
     #         print(repr(e))
     #         print("4")
     #         pass
+=======
+>>>>>>> 1a097c17d2034274e47b31175305fb76f7ab57ab
     play_auto(None, None)
