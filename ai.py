@@ -143,6 +143,7 @@ class TetrisAgent:
             lines.append(key + " " + str(value) + "\n")
         weight_file.writelines(lines)
         weight_file.close()
+        print("3")
 
     def get_weights(self):
         return self.weights
@@ -344,6 +345,4 @@ class TetrisAgent:
                 if state.test_array(tmp) and p not in close_set:
                     q.push(tmp)
                     close_set.add(p)
-        if len(res) == 0:
-            raise Exception("No legal actions")
         return res

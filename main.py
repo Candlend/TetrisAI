@@ -234,6 +234,10 @@ class PlayField:
                 quit_game()  # end by spawn overlap
 
     def take_action(self, action):
+        if action is None:
+            self.update_score(-10000)
+            print("No legal action!")
+            return False
         self.blit_previews()
         if action.tet_type != self.cur_tetromino.type:
             if self.hold_tet != '':
@@ -256,6 +260,8 @@ class PlayField:
 
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
         if self.place_piece() == 0:
+            self.update_score(-10000)
+            print("All overflow!")
             return False
         # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
@@ -267,6 +273,8 @@ class PlayField:
         self.rand_add_garbage()
 
         if not self.test_array():
+            self.update_score(-10000)
+            print("Overlap!")
             return False
         return True
 
@@ -335,6 +343,9 @@ class PlayField:
                         self.overflow_field[coordinates[0] + x][coordinates[1] + y + 20] = tetrominoes.index(
                             self.cur_tetromino.type) + 1
                         blocks -= 1
+
+        if blocks == 0:
+            return 0
 
         blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
 
@@ -572,10 +583,13 @@ def blit_stats_constants():
 
 
 def quit_game():
+    print("1")
+    agent.quit()
     if True:
+        print("2")
+
         raise RuntimeError()
     else:
-        agent.quit()
         pygame.quit()
         sys.exit()
 
@@ -712,5 +726,7 @@ if __name__ == '__main__':
     while(True):
         try:
             play_auto(None, None)
-        except:
+        except Exception as e:
+            print(repr(e))
+            print("4")
             pass
