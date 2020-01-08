@@ -7,7 +7,7 @@ from keyboard import is_pressed
 from ai import Action, GameState, TetrisAgent
 from tetromino import Tetromino
 import numpy as np
-
+import traceback
 # 0, 0 is TOP LEFT FOR BLITTING - REMEMBER
 # piece order - 0S, 1Z, 2J, 3L, 4T, 5O, 6I, 7Garbage
 
@@ -18,7 +18,7 @@ class PlayField:
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
-        self.garbage_probs = [0.4, 0, 0, 0, 0]
+        self.garbage_probs = [0.02, 0, 0, 0, 0]
         self.combo = 0
         if grid is None:
             self.field = np.zeros((10, 20), dtype=int)
@@ -235,16 +235,17 @@ class PlayField:
 
     def take_action(self, action):
         if action is None:
-            self.update_score(-10000)
+            self.update_score(-1000)
+            traceback.print_exc()
             print("No legal action!")
             return False
         self.blit_previews()
-        if action.tet_type != self.cur_tetromino.type:
-            if self.hold_tet != '':
-                self.next_pieces.insert(0, self.hold_tet)
-            self.hold_tet = self.cur_tetromino.type
-            screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
-            self.new_piece()
+        # if action.tet_type != self.cur_tetromino.type:
+        #     if self.hold_tet != '':
+        #         self.next_pieces.insert(0, self.hold_tet)
+        #     self.hold_tet = self.cur_tetromino.type
+        #     screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
+        #     self.new_piece()
         self.cur_tetromino = Tetromino(action.tet_type)
         for op, kick in action.moving:
             start = time()
@@ -260,7 +261,7 @@ class PlayField:
 
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
         if self.place_piece() == 0:
-            self.update_score(-10000)
+            self.update_score(-1000)
             print("All overflow!")
             return False
         # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
@@ -270,10 +271,10 @@ class PlayField:
 
 
         self.new_piece()
-        self.rand_add_garbage()
+        #self.rand_add_garbage()
 
         if not self.test_array():
-            self.update_score(-10000)
+            self.update_score(-1000)
             print("Overlap!")
             return False
         return True
@@ -307,14 +308,10 @@ class PlayField:
             if tspin:
                 score *= 4
             score *= (1 + self.combo * 0.1)
-            
-            print("score: ", score)
             self.combo += 1
         else:
             self.combo = 0
         self.update_score(score)
-        print("combo: ", self.combo)
-        print("=============")
 
         return removed_lines
 
@@ -583,11 +580,8 @@ def blit_stats_constants():
 
 
 def quit_game():
-    print("1")
     agent.quit()
     if True:
-        print("2")
-
         raise RuntimeError()
     else:
         pygame.quit()
@@ -708,14 +702,14 @@ if __name__ == '__main__':
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 8, 0, 0, 8, 8, 0, 0],
-    [0, 0, 0, 8, 0, 0, 0, 8, 0, 0],
-    [0, 0, 0, 8, 8, 0, 8, 8, 0, 0],
-    [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
-    [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
-    [0, 0, 0, 0, 8, 8, 8, 0, 0, 0],
-    [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
-    [8, 8, 0, 0, 8, 8, 8, 0, 0, 8],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
     [8, 8, 0, 8, 8, 8, 8, 0, 0, 8],
 ]
@@ -725,8 +719,8 @@ if __name__ == '__main__':
     #play_game(grid, next_pieces)
     while(True):
         try:
-            play_auto(None, None)
+            play_auto(grid, None)
         except Exception as e:
             print(repr(e))
-            print("4")
+            traceback.print_exc()
             pass

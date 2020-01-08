@@ -123,9 +123,9 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.5
-        self.epsilon = 0.5
-        self.discount = 0.5
+        self.alpha = 0.4
+        self.epsilon = 0
+        self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
         weight_file = open("settings/weights.txt", "r")
@@ -143,12 +143,13 @@ class TetrisAgent:
             lines.append(key + " " + str(value) + "\n")
         weight_file.writelines(lines)
         weight_file.close()
-        print("3")
 
     def get_weights(self):
         return self.weights
 
     def get_next_grid(self, state, action):
+        if action == None:
+            return (state.field.field, state.field.overflow_field)
         field = state.field.field.copy()
         overflow_field = state.field.overflow_field.copy()
         coordinates = action.pos
@@ -170,7 +171,10 @@ class TetrisAgent:
     def get_features(self, state, action):
         feats = util.Counter()
 
-        landingHeight = action.pos[0]   # Height where the last piece is added, Prevents from increasing the pile height
+        if (action == None):
+            landingHeight = 20
+        else:
+            landingHeight = 20 - action.pos[1]# Height where the last piece is added, Prevents from increasing the pile height
         # erodedPieceCells              # (Number of rows eliminated in the last move) × (Number of bricks eliminated from the last piece added), Encourages to complete rows
         rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
         columnTransitions = 0           # Same thing for vertical transitions
@@ -182,8 +186,8 @@ class TetrisAgent:
         columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
 
-        (grid, overflow_grid) = self.get_next_grid(state, action)
-        grid = helper.NormalizeGrid(grid)
+        (grid_origin, overflow_grid) = self.get_next_grid(state, action)
+        grid = helper.NormalizeGrid(grid_origin)
         # grid_origin = state.field.field
         # grid = helper.NormalizeGrid(grid_origin)
         # Get column transition
@@ -199,9 +203,9 @@ class TetrisAgent:
 
         columnHeightsSum = 0
         lastColumnHeight = -1
-        for c in range(len(grid)):
+        for c in range(len(grid_origin)):
             h = 0
-            for i, j in enumerate(grid[c]):
+            for i, j in enumerate(grid_origin[c]):
                 if j != 0:
                     h = 20 - i
                     break
@@ -257,8 +261,17 @@ class TetrisAgent:
     def update(self, state, action, next_state, reward):
         features = self.get_features(state, action)
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
+
+        nbkey = list(features.keys())[0]
+        nobias = self.weights[nbkey]
+
         for feature, value in features.items():
             self.weights[feature] += self.alpha * diff * value
+
+        for feature in features.keys():
+            self.weights[feature] = self.weights[feature]/nobias
+
+        print(self.weights)
 
     def get_policy(self, state, legal_actions):
         max_value = - float("inf")
@@ -273,8 +286,6 @@ class TetrisAgent:
     def get_value(self, state):
         legal_actions = self.get_legal_actions(state)
         action = self.get_policy(state, legal_actions)
-        if action is None:
-            return 0.0
         return self.get_q_value(state, action)
 
     def get_action(self, state):
