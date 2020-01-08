@@ -289,17 +289,18 @@ class PlayField:
                 if 0 not in line:
                     self.overflow_field = np.insert(np.delete(self.overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
                     removed_lines += 1
-
+        score = 1
         if removed_lines:
-            score = 2 ** (removed_lines - 1) * 10
+            score += 2 ** (removed_lines - 1) * 10
             if tspin:
                 score *= 4
             score *= (1 + self.combo * 0.1)
-            self.update_score(score)
+            
             print("score: ", score)
             self.combo += 1
         else:
             self.combo = 0
+        self.update_score(score)
         print("combo: ", self.combo)
         print("=============")
 

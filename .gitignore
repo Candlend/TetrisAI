@@ -4,3 +4,4 @@ misamino/tetris_ai/tetris_ai.vcxproj
 __pycache__/
 .vscode/
 test.py
+settings/weights.txt
