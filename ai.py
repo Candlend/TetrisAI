@@ -124,8 +124,8 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.4
-        self.epsilon = 0.4
+        self.alpha = 0.05
+        self.epsilon = 0.1
         self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
@@ -241,8 +241,10 @@ class TetrisAgent:
 
         # get row eliminated
         for i in range(len(grid)):
-            if (0 not in grid[i]):
-                rowEliminated += 100
+            if 0 not in grid[i]:
+                rowEliminated += 1
+        rowEliminated += 1
+
         rowEliminatedSquare = rowEliminated ** 2
 
         feats["landingHeight"]       = landingHeight
@@ -282,10 +284,11 @@ class TetrisAgent:
             self.weights[feature] += self.alpha * diff * value
             m += self.weights[feature] ** 2
         m = math.sqrt(m)
+        if m == 0:
+            return
         for feature, value in features.items():
-            self.weights[feature] /= m
+            self.weights[feature] = self.weights[feature] / m
 
-        print(self.weights)
 
     def get_policy(self, state, legal_actions):
         max_value = - float("inf")
