@@ -18,7 +18,8 @@ class PlayField:
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
-        self.garbage_probs = [0.01, 0.01, 0.01, 0.001, 0.001]
+        self.garbage_probs = [0.4, 0, 0, 0, 0]
+        self.combo = 0
         if grid is None:
             self.field = np.zeros((10, 20), dtype=int)
         else:
@@ -59,24 +60,11 @@ class PlayField:
 
         self.pieces_placed = 0
         self.total_score = 0
-        self.combo = 0
 
         screen.fill((60, 60, 60), (position[0] - self.left_border, position[1], self.left_border, 32 * 20))
         screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
         self.update_score()
         self.reblit_field()
-
-    def try_move_left(self):
-        if self.test_array(offset=[-1, 0]):
-            self.cur_tetromino.pos[0] -= 1
-            return True
-        return False
-
-    def try_move_right(self):
-        if self.test_array(offset=[1, 0]):
-            self.cur_tetromino.pos[0] += 1
-            return True
-        return False
 
     def try_rotate_left(self):
         self.cur_tetromino.rotate('left')
@@ -250,7 +238,6 @@ class PlayField:
             self.hold_tet = self.cur_tetromino.type
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
-        # self.rand_add_garbage()
         self.cur_tetromino = Tetromino(action.tet_type)
         for each in action.moving:
             start = time()
@@ -270,9 +257,10 @@ class PlayField:
 
         # if self.clear_lines(self.cur_tetromino.ghost_pos, tspin):
         #     self.reblit_field()
-            
+
 
         self.new_piece()
+        self.rand_add_garbage()
 
         if not self.test_array():
             quit_game()
@@ -289,21 +277,16 @@ class PlayField:
         removed_lines = 0
 
         for y in range(length):
-            line = []
             if 0 <= y + coordinates[1] <= 19:
-                for x in range(10):
-                    line.append(self.field[x][y + coordinates[1]])
+                line = self.field[:, y + coordinates[1]]
                 if 0 not in line:
-                    for i in range(10):
-                        self.field[i] = np.insert(np.delete(self.field[i], y + coordinates[1]), 0, self.overflow_field[i][19])
-                        self.overflow_field[i] = np.insert(np.delete(self.overflow_field[i], 19), 0, 0)
+                    self.field = np.insert(np.delete(self.field, y + coordinates[1], 1), 0, self.overflow_field[:, 19], 1)
+                    self.overflow_field = np.insert(np.delete(self.overflow_field, 19, 1), 0, np.zeros(10, dtype=np.int), 1)
                     removed_lines += 1
             elif 0 > y + coordinates[1]:
-                for x in range(10):
-                    line.append(self.overflow_field[x][y + coordinates[1] + 20])
+                line = self.overflow_field[:, y + coordinates[1] + 20]
                 if 0 not in line:
-                    for i in range(10):
-                        self.overflow_field[i] = np.insert(np.delete(self.overflow_field[i], y + coordinates[1] + 20), 0, 0)
+                    self.overflow_field = np.insert(np.delete(self.overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
                     removed_lines += 1
 
         if removed_lines:
@@ -319,7 +302,6 @@ class PlayField:
         print("combo: ", self.combo)
         print("=============")
 
-        
         return removed_lines
 
     def update_score(self, score=0):
@@ -330,7 +312,7 @@ class PlayField:
     def place_piece(self):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
         self.pieces_placed += 1
         tspin = self.test_if_spin()
-        
+
         grid = self.cur_tetromino.grid
         coordinates = self.cur_tetromino.ghost_pos
         length = self.cur_tetromino.length
@@ -425,7 +407,7 @@ class PlayField:
         for test in tests:
             if self.test_array(offset=test):
                 return test
-        return 0
+        return None
 
     def find_ghost_pos(self):
         grid = self.cur_tetromino.grid
@@ -479,7 +461,10 @@ class PlayField:
         garbage = [tetrominoes.index("garbage") + 1 for _ in range(10)]
         garbage[randint(0, 9)] = 0
         garbages = np.array([garbage for _ in range(num_lines)])
-        self.field = np.delete(self.field, range(num_lines - 1), axis=1)
+        self.overflow_field = np.insert(np.delete(self.overflow_field, range(20 - num_lines, 20), 1), 0,
+                                        self.field[:, 0:num_lines].T, 1)
+
+        self.field = np.delete(self.field, range(num_lines), axis=1)
         self.field = np.column_stack((self.field, garbages.T))
         self.reblit_field()
 
@@ -698,19 +683,19 @@ if __name__ == '__main__':
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 8, 0, 0, 8, 8, 0, 0],
-        [0, 0, 0, 8, 0, 0, 0, 8, 0, 0],
-        [0, 0, 0, 8, 8, 0, 8, 8, 0, 0],
-        [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
-        [0, 0, 0, 8, 8, 8, 8, 8, 0, 0],
-        [0, 0, 0, 0, 8, 8, 8, 0, 0, 0],
-        [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
-        [8, 8, 0, 0, 8, 8, 8, 0, 0, 8],
-        [8, 8, 8, 0, 8, 8, 8, 0, 8, 8],
-        [8, 8, 0, 8, 8, 8, 8, 0, 0, 8],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [8, 8, 8, 8, 0, 8, 8, 8, 8, 8],
     ]
 
-    next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 'j', 'l', 't', 'o', 'i']
+    next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
-    # play_game(grid, next_pieces)
+    #play_game(grid, next_pieces)
     play_auto(grid, next_pieces)
