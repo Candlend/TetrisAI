@@ -1,4 +1,5 @@
 import numpy as np
+import matrix_hash
 
 
 def DyeingAlgorithm(grid):
@@ -30,18 +31,83 @@ def NormalizeGrid(grid):
     '''
     去除grid的颜色，将grid表示为0、1，0为空1为方块
     '''
-    for i in range(grid.shape[0]):
-        for j in range(grid.shape[1]):
-            if grid[i][j] != 0:
-                grid[i][j] = 1
+    newGrid = grid.copy()
+    for i in range(len(newGrid)):
+        for j in range(len(newGrid[0])):
+            if newGrid[i][j] != 0:
+                newGrid[i][j] = 1
+    return newGrid
 
 def GetRowTransition(grid):
     trans = 0
-    for i in range(grid.shape[0]):
+    for i in range(len(grid)):
         prev = -1
-        for j in range(grid.shape[1]):
+        print("trans:", trans)
+        for j in range(len(grid[0])):
             if j != 0:
                 if prev != grid[i][j]:
                     trans += 1
             prev = grid[i][j]
     return trans
+
+def get_Tspin_struct(grid):
+    Tspin_struct = [
+        [
+            [0,1],
+            [0,0],
+            [0,1]
+        ],
+        [
+            [0,1],
+            [0,0],
+            [0,1],
+            [1,1]
+        ],
+        [
+            [1,1],
+            [0,1],
+            [0,0],
+            [0,1]
+        ],
+        [
+            [1,1],
+            [0,1],
+            [0,0],
+            [0,1],
+            [1,1]
+        ],
+        [
+            [0,1,1],
+            [0,0,1],
+            [0,0,0],
+            [0,0,1],
+            [0,1,1]
+        ],
+        [
+            [0,1,1],
+            [0,0,1],
+            [0,0,0],
+            [0,0,1],
+            [1,1,1]
+        ],
+        [
+            [1,1,1],
+            [0,0,1],
+            [0,0,0],
+            [0,0,1],
+            [0,1,1]
+        ],
+        [
+            [1,1,1],
+            [0,0,1],
+            [0,0,0],
+            [0,0,1],
+            [1,1,1]
+        ]
+    ]
+    res = [0, 0, 0, 0]
+    res[0] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[0])
+    res[1] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[1]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[2])
+    res[2] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[3])
+    res[3] = matrix_hash.matrix_find_cnt(grid, Tspin_struct[4]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[5]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[6]) + matrix_hash.matrix_find_cnt(grid, Tspin_struct[7])
+    return res
