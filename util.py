@@ -129,7 +129,8 @@ class FixedRandom:
             3175491512, 656431560, 1153671785, 236307875, 2824738046, 2320621382, 892174056, \
             230984053, 719791226, 2718891946, 624), None)
         self.random = random.Random()
-        self.random.setstate(fixedState)
+        # self.random.setstate(fixedState)
+        self.random.seed()
 
 """
  Data structures useful for implementing SearchAgents
