@@ -237,12 +237,12 @@ class PlayField:
 
     def take_action(self, action):
         self.blit_previews()
-        if action.tet_type != self.cur_tetromino.type:
-            if self.hold_tet != '':
-                self.next_pieces.insert(0, self.hold_tet)
-            self.hold_tet = self.cur_tetromino.type
-            screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
-            self.new_piece()
+        # if action.tet_type != self.cur_tetromino.type:
+        #     if self.hold_tet != '':
+        #         self.next_pieces.insert(0, self.hold_tet)
+        #     self.hold_tet = self.cur_tetromino.type
+        #     screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
+        #     self.new_piece()
         self.cur_tetromino = Tetromino(action.tet_type)
         for op, kick in action.moving:
             start = time()
