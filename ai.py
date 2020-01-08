@@ -140,7 +140,7 @@ class TetrisAgent:
         weight_file = open("settings/weights.txt", "w")
         lines = []
         for key, value in self.weights.items():
-            lines.append(key + " " + str(value))
+            lines.append(key + " " + str(value) + "\n")
         weight_file.writelines(lines)
         weight_file.close()
 
