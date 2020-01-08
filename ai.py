@@ -181,7 +181,8 @@ class TetrisAgent:
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
         maximumHeight = 0               # Maximum pile height: maxp hp, Prevents from having a big pile
 
-        grid = helper.NormalizeGrid(state.field.field)
+        (grid, overflow_grid) = get_next_grid(state, action)
+        grid = helper.NormalizeGrid(grid)
 
         # Get column transition
         columnTransitions = helper.GetRowTransition(grid)
