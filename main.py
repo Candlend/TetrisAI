@@ -462,8 +462,8 @@ class PlayField:
         garbage = [tetrominoes.index("garbage") + 1 for _ in range(10)]
         garbage[randint(0, 9)] = 0
         garbages = np.array([garbage for _ in range(num_lines)])
-        self.overflow_field = np.insert(np.delete(self.overflow_field, range(20 - num_lines, 20), 1), 0,
-                                        self.field[:, 0:num_lines].T, 1)
+        self.overflow_field = np.delete(self.overflow_field, range(num_lines), 1)
+        self.overflow_field = np.column_stack((self.overflow_field, self.field[:, 0:num_lines]))
 
         self.field = np.delete(self.field, range(num_lines), axis=1)
         self.field = np.column_stack((self.field, garbages.T))
