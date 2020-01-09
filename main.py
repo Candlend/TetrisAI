@@ -23,7 +23,7 @@ class PlayField:
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
-        self.garbage_probs = [0, 0, 0, 0, 0]
+        self.garbage_probs = [0.08, 0.03, 0.008, 0.005, 0.0001]
         self.combo = 0
         if grid is None:
             self.field = np.zeros((10, 20), dtype=int)
@@ -253,7 +253,7 @@ class PlayField:
             self.cur_tetromino.take_op(op, kick)
             blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
             pygame.display.flip()
-            #sleep(max(0.0, 0.03333333333 - (time() - start)))
+            # sleep(max(0.0, 0.03333333333 - (time() - start)))
 
         # self.cur_tetromino.grid = action.grid
         # self.cur_tetromino.rotation = action.rotation
@@ -367,10 +367,10 @@ class PlayField:
                     removed_lines += 1
         score = 0
         if removed_lines:
-            score += 2 ** (removed_lines - 1) * 10
+            score += 4 ** (removed_lines - 1) * 10
             if tspin:
-                score *= 4
-            score *= (1 + self.combo * 0.1)
+                score *= 256
+            score *= (1 + self.combo) ** 2
             
             print("score: ", score)
             self.combo += 1
@@ -780,4 +780,4 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     #play_game(grid, next_pieces)
-    play_auto(grid, None)
+    play_auto(None, None)

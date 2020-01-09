@@ -124,8 +124,8 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0
-        self.epsilon = 0
+        self.alpha = 0.000001
+        self.epsilon = 0.2
         self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
@@ -192,14 +192,12 @@ class TetrisAgent:
         holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
         boardWells = 0                  # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
         wellDepth = 0
-        wellDepthSquare = 0
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
         rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
         columnHeightsAvg = 0            # Average Height of the p columns of the board
         columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
         rowEliminated = 0               # Row eliminated in the move
-        rowEliminatedSquare = 0         # squre of rowEliminted
         # blockEliminated = 0
 
         (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
@@ -230,7 +228,7 @@ class TetrisAgent:
                                 holeDepth += (i - k)
                                 break
             rowsWithHoles += rowHasHole
-        
+
         # get well depth
         topHeight = 0
         bottomHeight = 0
@@ -244,7 +242,6 @@ class TetrisAgent:
                 if reachableIdentifier[i][j] == 0:
                     bottomHeight = i
         wellDepth = bottomHeight - topHeight
-        wellDepthSquare = wellDepth ** 2
 
         # get column height avg, max, difference
         columnHeightsSum = 0
@@ -263,6 +260,7 @@ class TetrisAgent:
             if h > columnHeightsMax:
                 columnHeightsMax = h
             columnHeightsSum += h
+            feats["columnHeight" + str(c)] = h
         columnHeightsAvg = columnHeightsSum / len(grid)
 
         # # get row eliminated
@@ -271,22 +269,18 @@ class TetrisAgent:
         #         rowEliminated += 1
         # rowEliminated += 1
 
-        rowEliminatedSquare = rowEliminated ** 2
-
         feats["landingHeight"]       = landingHeight
         feats["rowTransitions"]      = rowTransitions
         feats["columnTransitions"]   = columnTransitions
         feats["holes"]               = holes
         feats["boardWells"]          = boardWells
         feats["wellDepth"]           = wellDepth
-        feats["wellDepthSquare"]     = wellDepthSquare
         feats["holeDepth"]           = holeDepth
         feats["rowsWithHoles"]       = rowsWithHoles
         feats["columnHeightsAvg"]    = columnHeightsAvg
         feats["columnHeightsMax"]    = columnHeightsMax
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
-        feats["rowEliminatedSquare"] = rowEliminatedSquare
 
         return feats
 
@@ -306,19 +300,23 @@ class TetrisAgent:
         self.update(state, action, next_state, reward)
 
     def update(self, state, action, next_state, reward):
-
+        print("reward %d" % reward)
         features = self.get_features(state, action)
+        for feature, value in features.items():
+            print(feature + " " + str(self.weights[feature]))
+            print(value)
+        print("=======")
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
         m = 0
 
         for feature, value in features.items():
             self.weights[feature] += self.alpha * diff * value
-            m += self.weights[feature] ** 2
-        m = math.sqrt(m)
-        if m == 0:
-            return
-        for feature, value in features.items():
-            self.weights[feature] = self.weights[feature] / m
+        #     m += self.weights[feature] ** 2
+        # m = math.sqrt(m)
+        # if m == 0:
+        #     return
+        # for feature, value in features.items():
+        #     self.weights[feature] = self.weights[feature] / m
 
 
     def get_policy(self, state, legal_actions):
