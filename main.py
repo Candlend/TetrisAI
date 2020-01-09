@@ -72,6 +72,50 @@ class PlayField:
         screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
         self.update_score()
         self.reblit_field()
+        self.record_dict = dict()
+        self.record_dict["removed"] = 0
+        self.record_dict["clear1"] = 0
+        self.record_dict["clear2"] = 0
+        self.record_dict["clear3"] = 0
+        self.record_dict["clear4"] = 0
+        self.record_dict["tspin2"] = 0
+        self.record_dict["tspin3"] = 0
+        self.record_dict["combo2"] = 0
+        self.record_dict["combo3"] = 0
+        self.record_dict["combo4"] = 0
+        self.record_dict["combo5"] = 0
+        self.record_dict["combo6"] = 0
+        self.record_dict["combo7"] = 0
+        self.record_dict["combo8"] = 0
+        self.record_dict["combo9"] = 0
+        self.record_dict["comboMore"] = 0
+
+
+
+
+
+    def record(self, score, time):
+        record_file = open("settings/record.csv", "a+")
+        string = str(score) + ", " + str(time) + ", "
+        string += str(self.record_dict["removed"]) + ", "
+        string += str(self.record_dict["clear1"]) + ", "
+        string += str(self.record_dict["clear2"]) + ", "
+        string += str(self.record_dict["clear3"]) + ", "
+        string += str(self.record_dict["clear4"]) + ", "
+        string += str(self.record_dict["tspin2"]) + ", "
+        string += str(self.record_dict["tspin3"]) + ", "
+        string += str(self.record_dict["combo2"]) + ", "
+        string += str(self.record_dict["combo3"]) + ", "
+        string += str(self.record_dict["combo4"]) + ", "
+        string += str(self.record_dict["combo5"]) + ", "
+        string += str(self.record_dict["combo6"]) + ", "
+        string += str(self.record_dict["combo7"]) + ", "
+        string += str(self.record_dict["combo8"]) + ", "
+        string += str(self.record_dict["combo9"]) + ", "
+        string += str(self.record_dict["comboMore"]) + ", "
+        lines = [string + "\n"]
+        record_file.writelines(lines)
+        record_file.close()
 
     def try_rotate_left(self):
         self.cur_tetromino.rotate('left')
@@ -386,12 +430,25 @@ class PlayField:
             score += 2 ** (removed_lines - 1) * 10
             if tspin:
                 score *= 4
+                if removed_lines == 2:
+                    self.record_dict["tspin2"] += 1
+                elif removed_lines == 3:
+                    self.record_dict["tspin3"] += 1
             score += self.combo * 10
-
             # print("score: ", score)
             self.combo += 1
         else:
             self.combo = 0
+        if self.combo > 1:
+            if self.combo > 9:
+                self.record_dict["comboMore"] += 1
+            else:
+                self.record_dict["combo%d" % self.combo] += 1
+
+        if removed_lines > 0:
+            self.record_dict["clear%d" % removed_lines] += 1
+            self.record_dict["removed"] += removed_lines
+
         self.update_score(score)
 
         return removed_lines
@@ -660,14 +717,7 @@ def blit_stats_constants():
     screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
     screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
 
-def record(score, time):
-    record_file = open("settings/record.csv", "a+")
-    lines = [str(score) + ", " + str(time) + "\n"]
-    record_file.writelines(lines)
-    record_file.close()
-
 def quit_game(score, time = None):
-    record(score, time)
     agent.quit()
     pygame.quit()
     sys.exit(score)
@@ -749,6 +799,7 @@ def play_auto(grid = None, next_pieces = None):
             if event.type == pygame.QUIT:
                 quit_game(field.total_score - death_penalty, seconds)
         if not result:
+            field.record(field.total_score - death_penalty, seconds)
             quit_game(field.total_score - death_penalty, seconds)
         # sleep(0.3)
 
