@@ -247,17 +247,17 @@ class PlayField:
             screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
         self.cur_tetromino = Tetromino(action.tet_type)
-        for op, kick in action.moving:
-            start = time()
-            blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.pos)
-            self.cur_tetromino.take_op(op, kick)
-            blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
-            pygame.display.flip()
-            # sleep(max(0.0, 0.03333333333 - (time() - start)))
+        # for op, kick in action.moving:
+        #     start = time()
+        #     blit_tet(self.cur_tetromino.grid, 'black', self.cur_tetromino.pos)
+        #     self.cur_tetromino.take_op(op, kick)
+        #     blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
+        #     pygame.display.flip()
+            # sleep(max(0.0, 0.025 - (time() - start)))
 
-        # self.cur_tetromino.grid = action.grid
-        # self.cur_tetromino.rotation = action.rotation
-        # self.cur_tetromino.pos = action.pos
+        self.cur_tetromino.grid = action.grid
+        self.cur_tetromino.rotation = action.rotation
+        self.cur_tetromino.pos = action.pos
 
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
         if self.place_piece() == 0:
@@ -304,6 +304,21 @@ class PlayField:
         grid,_pos = tet.spawn_tet()
         q.push(tet)
         close_set.add((_pos[0], _pos[1], tet.rotation))
+        field = self.field
+        length = tet.length
+        minIdx = 19
+        for c in range(len(field)):
+            h = 19
+            for i, j in enumerate(field[c]):
+                if j != 0:
+                    h = i - 1
+                    break
+            if h < minIdx:
+                minIdx = h
+        if minIdx - length > tet.pos[1]:
+            tet.pos[1] = minIdx - length
+        for i in range(minIdx - length - _pos[1]):
+            tet.moving.append((0, (0, 0)))
         res = []
         while not q.isEmpty():
             cur = q.pop()
@@ -367,12 +382,12 @@ class PlayField:
                     removed_lines += 1
         score = 0
         if removed_lines:
-            score += 4 ** (removed_lines - 1) * 10
+            score += 2 ** (removed_lines - 1) * 10
             if tspin:
-                score *= 256
-            score *= (1 + self.combo) ** 2
-            
-            print("score: ", score)
+                score *= 4
+            score += self.combo * 10
+
+            # print("score: ", score)
             self.combo += 1
         else:
             self.combo = 0
@@ -628,23 +643,30 @@ def first_non_zero(my_list):
 
 
 def game_intro():
-    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
-    screen.blit(helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
-    pygame.display.flip()
-    sleep(0.3)
-    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
-    screen.blit(helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
-    pygame.display.flip()
-    sleep(0.3)
-    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+    pass
+    # screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+    # screen.blit(helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
+    # pygame.display.flip()
+    # sleep(0.3)
+    # screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+    # screen.blit(helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
+    # pygame.display.flip()
+    # sleep(0.3)
+    # screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
 
 
 def blit_stats_constants():
     screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
     screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
 
+def record(score, time):
+    record_file = open("settings/record.csv", "a+")
+    lines = [str(score) + ", " + str(time) + "\n"]
+    record_file.writelines(lines)
+    record_file.close()
 
-def quit_game(score):
+def quit_game(score, time = None):
+    record(score, time)
     agent.quit()
     pygame.quit()
     sys.exit(score)
@@ -724,9 +746,9 @@ def play_auto(grid = None, next_pieces = None):
         pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game(field.total_score + 10000)
+                quit_game(field.total_score + 10000, seconds)
         if not result:
-            quit_game(field.total_score + 10000)
+            quit_game(field.total_score + 10000, seconds)
         # sleep(0.3)
 
 
@@ -779,5 +801,5 @@ if __name__ == '__main__':
 
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
-    #play_game(grid, next_pieces)
+    # play_game(grid, None)
     play_auto(None, None)
