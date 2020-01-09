@@ -23,7 +23,7 @@ class PlayField:
         self.left_border = 32 * 2
         self.right_border = 32 * 2
         self.score_pos_y = 32 * 4
-        self.garbage_probs = [0.08, 0.03, 0.008, 0.005, 0.0001]
+        self.garbage_probs = [0.05, 0.03, 0.005, 0.001, 0.0001]
         self.combo = 0
         if grid is None:
             self.field = np.zeros((10, 20), dtype=int)

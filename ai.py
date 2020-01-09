@@ -124,8 +124,9 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.00001
-        self.epsilon = 0.2
+        self.alpha = 0.00000000001 ** 2 * 0.1
+        # self.alpha = 0
+        self.epsilon = 0
         self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
@@ -286,6 +287,13 @@ class TetrisAgent:
         feats["columnHeightsMax"]    = columnHeightsMax
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
+
+        feats_copy = copy.deepcopy(feats)
+        for k, v in feats_copy.items():
+            feats[k + "Square"] = v ** 2
+            feats[k + "Cubic"] = v ** 3
+            feats[k + "Quartic"] = v ** 4
+
 
         return feats
 
