@@ -16,7 +16,7 @@ import util
 
 ops = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
 
-death_penalty = -500
+death_penalty = -2000
 
 class PlayField:
     def __init__(self, position, grid, next_pieces):  # position is top left of field - DOES NOT INCLUDE BORDER

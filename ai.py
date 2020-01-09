@@ -180,7 +180,9 @@ class TetrisAgent:
                 if 0 not in line:
                     overflow_field = np.insert(np.delete(overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
                     removed_lines += 1
-        return field, overflow_field, removed_lines
+
+        tspin = state.field.test_if_spin()
+        return field, overflow_field, removed_lines, tspin
 
 
     def get_features(self, state, action):
@@ -202,10 +204,14 @@ class TetrisAgent:
         # blockEliminated = 0
         tSpinStruct = 0
         combo = 0
+        tspin = 0
 
         combo = state.field.combo
+        cur_score = state.field.total_score
 
-        (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
+        (grid_origin, overflow_grid, rowEliminated, tspin) = self.get_next_grid(state, action)
+
+        tspin = 1 if tspin else -1
         grid = helper.NormalizeGrid(grid_origin)
         # grid_origin = state.field.field
         # grid = helper.NormalizeGrid(grid_origin)
@@ -291,6 +297,7 @@ class TetrisAgent:
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
         feats["combo"]               = combo
+        feats["tspin"]               = tspin
         # feats_copy = copy.deepcopy(feats)
         # for k, v in feats_copy.items():
         #     feats[k + "Square"] = v ** 2
