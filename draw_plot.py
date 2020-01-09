@@ -23,6 +23,20 @@ if __name__ == "__main__":
                 y = np.array(y)
                 print('Vector generated...')
                 plt.plot(x, y, color='red')
+                # plt.ylabel('$%.2f x^{4} + %.2f x^{3} + %.2f x^{2} + %.2f x$' %(args[5], args[4], args[3], args[2]))
+                plt.ylabel('$f(x)$')
+                plt.xlabel('x')
+                fx = '$'
+                if abs(args[5]) > 0:
+                    fx += '%.2f x^{4}' %(args[5])
+                if abs(args[4]) > 0:
+                    fx += '%.2f x^{3}' %(args[4])
+                if abs(args[3]) > 0:
+                    fx += '%.2f x^{2}' %(args[3])
+                if abs(args[2]) > 0:
+                    fx += '%.2f x' %(args[2])
+                fx += '$'
+                plt.legend(['$f(x) = $' + fx], loc = 'upper right')
                 print('ploted...')
                 plt.savefig('%d.png' % t)
                 plt.clf()
