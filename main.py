@@ -253,7 +253,7 @@ class PlayField:
             self.cur_tetromino.take_op(op, kick)
             blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.pos)
             pygame.display.flip()
-            # sleep(max(0.0, 0.03333333333 - (time() - start)))
+            # sleep(max(0.0, 0.025 - (time() - start)))
 
         # self.cur_tetromino.grid = action.grid
         # self.cur_tetromino.rotation = action.rotation
@@ -367,12 +367,12 @@ class PlayField:
                     removed_lines += 1
         score = 0
         if removed_lines:
-            score += 4 ** (removed_lines - 1) * 10
+            score += 2 ** (removed_lines - 1) * 10
             if tspin:
-                score *= 256
-            score *= (1 + self.combo) ** 2
-            
-            print("score: ", score)
+                score *= 4
+            score += self.combo * 10
+
+            # print("score: ", score)
             self.combo += 1
         else:
             self.combo = 0
@@ -643,8 +643,14 @@ def blit_stats_constants():
     screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
     screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
 
+def record(score, time):
+    record_file = open("settings/record.csv", "a+")
+    lines = [str(score) + ", " + str(time) + "\n"]
+    record_file.writelines(lines)
+    record_file.close()
 
-def quit_game(score):
+def quit_game(score, time = None):
+    record(score, time)
     agent.quit()
     pygame.quit()
     sys.exit(score)
@@ -724,9 +730,9 @@ def play_auto(grid = None, next_pieces = None):
         pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game(field.total_score + 10000)
+                quit_game(field.total_score + 10000, seconds)
         if not result:
-            quit_game(field.total_score + 10000)
+            quit_game(field.total_score + 10000, seconds)
         # sleep(0.3)
 
 
@@ -779,5 +785,5 @@ if __name__ == '__main__':
 
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
-    #play_game(grid, next_pieces)
+    # play_game(grid, None)
     play_auto(None, None)

@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.00000000001 ** 2 * 0.1
+        self.alpha = 0.00000000001 ** 2
         # self.alpha = 0
         self.epsilon = 0
         self.discount = 0.8
@@ -191,7 +191,7 @@ class TetrisAgent:
         rowTransitions = 0              # Number of horizontal full to empty or empty to full transitions between the cells on the board, Makes the board homogeneous
         columnTransitions = 0           # Same thing for vertical transitions
         holes = 0                       # Number of empty cells covered by at least one full cell, Prevents from making holes
-        boardWells = 0                  # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
+        # boardWells = 0                  # Add up all W's, which w is a well and W = (1 + 2 + · · · + depth(w)), Prevents from making wells
         wellDepth = 0
         holeDepth = 0                   # Indicates how far holes are under the surface of the pile: it is the sum of the number of full cells above each hole
         rowsWithHoles = 0               # counts the number of rows having at least one hole (two holes on the same row count for only one)
@@ -279,7 +279,7 @@ class TetrisAgent:
         feats["rowTransitions"]      = rowTransitions
         feats["columnTransitions"]   = columnTransitions
         feats["holes"]               = holes
-        feats["boardWells"]          = boardWells
+        # feats["boardWells"]          = boardWells
         feats["wellDepth"]           = wellDepth
         feats["holeDepth"]           = holeDepth
         feats["rowsWithHoles"]       = rowsWithHoles
@@ -288,14 +288,22 @@ class TetrisAgent:
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
 
-        feats_copy = copy.deepcopy(feats)
-        for k, v in feats_copy.items():
-            feats[k + "Square"] = v ** 2
-            feats[k + "Cubic"] = v ** 3
-            feats[k + "Quartic"] = v ** 4
+        # feats_copy = copy.deepcopy(feats)
+        # for k, v in feats_copy.items():
+        #     feats[k + "Square"] = v ** 2
+        #     feats[k + "Cubic"] = v ** 3
+        #     feats[k + "Quartic"] = v ** 4
 
 
         return feats
+
+    def get_q_value(self, state, action):
+        # sum_value = 0
+        # feats = self.get_features(state, action)
+        # for feature, value in feats.items():
+        #     sum_value += self.weights[feature] * value
+        # return sum_value
+        return self.get_features(state, action) * self.weights
 
 
     def get_q_value(self, state, action):
@@ -313,12 +321,12 @@ class TetrisAgent:
         self.update(state, action, next_state, reward)
 
     def update(self, state, action, next_state, reward):
-        print("reward %d" % reward)
+        # print("reward %d" % reward)
         features = self.get_features(state, action)
-        for feature, value in features.items():
-            print(feature + " " + str(self.weights[feature]))
-            print(value)
-        print("=======")
+        # for feature, value in features.items():
+            # print(feature + " " + str(self.weights[feature]))
+            # print(value)
+        # print("=======")
         diff = reward + self.discount * self.get_value(next_state) - self.get_q_value(state, action)
         m = 0
 
