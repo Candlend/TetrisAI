@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.000001
+        self.alpha = 0.00001
         self.epsilon = 0.2
         self.discount = 0.8
         self.QValues = util.Counter()
@@ -199,6 +199,7 @@ class TetrisAgent:
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
         rowEliminated = 0               # Row eliminated in the move
         # blockEliminated = 0
+        tSpinStruct = 0
 
         (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
         grid = helper.NormalizeGrid(grid_origin)
@@ -268,6 +269,10 @@ class TetrisAgent:
         #     if 0 not in grid[i]:
         #         rowEliminated += 1
         # rowEliminated += 1
+
+        # tSpinStructs = helper.get_Tspin_struct(grid)
+        # print(tSpinStructs)
+        # tSpinStruct = tSpinStructs[0] + tSpinStructs[1] * 4 + tSpinStructs[2] * 16 + tSpinStructs[3] * 64
 
         feats["landingHeight"]       = landingHeight
         feats["rowTransitions"]      = rowTransitions
