@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.00000000001 ** 2
+        self.alpha = 0.0000001
         # self.alpha = 0
         self.epsilon = 0
         self.discount = 0.8
