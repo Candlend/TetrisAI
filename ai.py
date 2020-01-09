@@ -124,7 +124,7 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.00000000001 ** 2
+        self.alpha = 0.000001
         # self.alpha = 0
         self.epsilon = 0
         self.discount = 0.8
@@ -201,6 +201,9 @@ class TetrisAgent:
         rowEliminated = 0               # Row eliminated in the move
         # blockEliminated = 0
         tSpinStruct = 0
+        combo = 0
+
+        combo = state.field.combo
 
         (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
         grid = helper.NormalizeGrid(grid_origin)
@@ -287,7 +290,7 @@ class TetrisAgent:
         feats["columnHeightsMax"]    = columnHeightsMax
         feats["columnDifference"]    = columnDifference
         feats["rowEliminated"]       = rowEliminated
-
+        feats["combo"]               = combo
         # feats_copy = copy.deepcopy(feats)
         # for k, v in feats_copy.items():
         #     feats[k + "Square"] = v ** 2

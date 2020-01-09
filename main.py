@@ -16,6 +16,7 @@ import util
 
 ops = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
 
+death_penalty = -500
 
 class PlayField:
     def __init__(self, position, grid, next_pieces):  # position is top left of field - DOES NOT INCLUDE BORDER
@@ -261,7 +262,7 @@ class PlayField:
 
         self.cur_tetromino.ghost_pos = self.find_ghost_pos()
         if self.place_piece() == 0:
-            self.update_score(-10000)
+            self.update_score(death_penalty)
             print("All overflow!")
             return False
         # blit_tet(self.cur_tetromino.grid, self.cur_tetromino.type, self.cur_tetromino.ghost_pos)
@@ -275,7 +276,7 @@ class PlayField:
 
         self.set_legal_actions()
         if len(self.legal_actions) == 0:
-            self.update_score(-10000)
+            self.update_score(death_penalty)
             print("No legal actions!")
             return False
 
@@ -746,9 +747,9 @@ def play_auto(grid = None, next_pieces = None):
         pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game(field.total_score + 10000, seconds)
+                quit_game(field.total_score - death_penalty, seconds)
         if not result:
-            quit_game(field.total_score + 10000, seconds)
+            quit_game(field.total_score - death_penalty, seconds)
         # sleep(0.3)
 
 
