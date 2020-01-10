@@ -7,6 +7,8 @@ import helper
 import math
 
 tetrominoes = ['s', 'z', 'j', 'l', 't', 'o', 'i', 'garbage', 'black']
+test_flag = False # test or train
+L4_flag = True
 
 class Action:
     def __init__(self, tet):
@@ -124,9 +126,16 @@ class GameState:
 
 class TetrisAgent:
     def __init__(self, **args):
-        self.alpha = 0.000001
-        # self.alpha = 0
-        self.epsilon = 0
+        if (test_flag):
+            self.alpha = 0
+            self.epsilon = 0
+        else:
+            if (L4_flag):
+                self.alpha = 0.00000000001 ** 2
+            else:
+                self.alpha = 0.000001
+            self.epsilon = 0
+
         self.discount = 0.8
         self.QValues = util.Counter()
         self.weights = util.Counter()
@@ -181,8 +190,7 @@ class TetrisAgent:
                     overflow_field = np.insert(np.delete(overflow_field, y + coordinates[1] + 20, 1), 0, np.zeros(10, dtype=np.int), 1)
                     removed_lines += 1
 
-        tspin = state.field.test_if_spin()
-        return field, overflow_field, removed_lines, tspin
+        return field, overflow_field, removed_lines
 
 
     def get_features(self, state, action):
@@ -200,18 +208,16 @@ class TetrisAgent:
         columnHeightsAvg = 0            # Average Height of the p columns of the board
         columnHeightsMax = 0            # Maximum column height
         columnDifference = 0            # Absolute difference |hp − hp+1| between adjacent columns, There are P − 1 such features where P is the board width
-        rowEliminated = 0               # Row eliminated in the move
+        # rowEliminated = 0               # Row eliminated in the move
         # blockEliminated = 0
-        tSpinStruct = 0
+        # tSpinStruct = 0
         combo = 0
-        tspin = 0
 
         combo = state.field.combo
         cur_score = state.field.total_score
 
-        (grid_origin, overflow_grid, rowEliminated, tspin) = self.get_next_grid(state, action)
+        (grid_origin, overflow_grid, rowEliminated) = self.get_next_grid(state, action)
 
-        tspin = 1 if tspin else -1
         grid = helper.NormalizeGrid(grid_origin)
         # grid_origin = state.field.field
         # grid = helper.NormalizeGrid(grid_origin)
@@ -295,15 +301,14 @@ class TetrisAgent:
         feats["columnHeightsAvg"]    = columnHeightsAvg
         feats["columnHeightsMax"]    = columnHeightsMax
         feats["columnDifference"]    = columnDifference
-        feats["rowEliminated"]       = rowEliminated
+        # feats["rowEliminated"]       = rowEliminated
         feats["combo"]               = combo
-        feats["tspin"]               = tspin
-        # feats_copy = copy.deepcopy(feats)
-        # for k, v in feats_copy.items():
-        #     feats[k + "Square"] = v ** 2
-        #     feats[k + "Cubic"] = v ** 3
-        #     feats[k + "Quartic"] = v ** 4
-
+        if (L4_flag):
+            feats_copy = copy.deepcopy(feats)
+            for k, v in feats_copy.items():
+                feats[k + "Square"] = v ** 2
+                feats[k + "Cubic"] = v ** 3
+                feats[k + "Quartic"] = v ** 4
 
         return feats
 

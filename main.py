@@ -17,6 +17,7 @@ import util
 ops = [0, 1, 2, 3, 4, 5]  # fall left right rl rr double
 
 death_penalty = -2000
+display_flag = True
 
 class PlayField:
     def __init__(self, position, grid, next_pieces):  # position is top left of field - DOES NOT INCLUDE BORDER
@@ -68,8 +69,9 @@ class PlayField:
         self.pieces_placed = 0
         self.total_score = 0
 
-        screen.fill((60, 60, 60), (position[0] - self.left_border, position[1], self.left_border, 32 * 20))
-        screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
+        if (display_flag):
+            screen.fill((60, 60, 60), (position[0] - self.left_border, position[1], self.left_border, 32 * 20))
+            screen.fill((60, 60, 60), (position[0] + 32 * 10, position[1], self.right_border, 32 * 20))
         self.update_score()
         self.reblit_field()
         self.record_dict = dict()
@@ -89,10 +91,6 @@ class PlayField:
         self.record_dict["combo8"] = 0
         self.record_dict["combo9"] = 0
         self.record_dict["comboMore"] = 0
-
-
-
-
 
     def record(self, score, time):
         record_file = open("settings/record.csv", "a+")
@@ -220,7 +218,8 @@ class PlayField:
                     self.hold_tet = self.cur_tetromino.type
                     self.held_already = True
                     self.hold = True
-                    screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
+                    if (display_flag):
+                        screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
                     break  # out of presses loop
                 elif press == buttons[0]:  # rotate left
                     self.try_rotate_left()
@@ -289,7 +288,8 @@ class PlayField:
             if self.hold_tet != '':
                 self.next_pieces.insert(0, self.hold_tet)
             self.hold_tet = self.cur_tetromino.type
-            screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
+            if (display_flag):
+                screen.blit(prev_tet_table[tetrominoes.index(self.hold_tet)], (0, 0))
             self.new_piece()
         self.cur_tetromino = Tetromino(action.tet_type)
         # for op, kick in action.moving:
@@ -403,11 +403,12 @@ class PlayField:
         return res
 
     def reblit_field(self):
-        screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
-        for x in range(10):
-            for y in range(20):
-                if self.field[x][y]:
-                    screen.blit(tet_table[self.field[x][y] - 1], (32 * x + self.position[0], 32 * y + self.position[1]))
+        if (display_flag):
+            screen.fill((0, 0, 0), (self.position[0], self.position[1], 32 * 10, 32 * 20))
+            for x in range(10):
+                for y in range(20):
+                    if self.field[x][y]:
+                        screen.blit(tet_table[self.field[x][y] - 1], (32 * x + self.position[0], 32 * y + self.position[1]))
 
     def clear_lines(self, coordinates, tspin):
         length = self.cur_tetromino.length
@@ -455,8 +456,9 @@ class PlayField:
 
     def update_score(self, score=0):
         self.total_score += score
-        screen.fill((0, 0, 0), (32 * 14, self.score_pos_y, 6 * 32, 2 * 32))
-        screen.blit(helvetica_big.render(str(self.total_score), False, (150, 150, 150)), (32 * 14, self.score_pos_y))
+        if (display_flag):
+            screen.fill((0, 0, 0), (32 * 14, self.score_pos_y, 6 * 32, 2 * 32))
+            screen.blit(helvetica_big.render(str(self.total_score), False, (150, 150, 150)), (32 * 14, self.score_pos_y))
 
     def place_piece(self):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
         self.pieces_placed += 1
@@ -495,8 +497,9 @@ class PlayField:
             self.next_pieces.extend(make_bag())
 
     def blit_previews(self):
-        for x in range(5):
-            screen.blit(prev_tet_table[tetrominoes.index(self.next_pieces[x])], (self.position[0] + 10 * 32, 64 * x))
+        if (display_flag):
+            for x in range(5):
+                screen.blit(prev_tet_table[tetrominoes.index(self.next_pieces[x])], (self.position[0] + 10 * 32, 64 * x))
 
     def test_array(self, offset=None):  # coords are top left... for now. Imagine aligning top left of grid with coords on field
         if offset is None:
@@ -666,20 +669,21 @@ def blit_tet(grid, tet, coordinates, ghost=False, position=None):  # coords are 
     # Maybe make into a field method?
     if position is None:
         position = [64, 0]
-    length = len(grid[0])
+    if (display_flag):
+        length = len(grid[0])
 
-    if ghost:
-        for y in range(length):
-            for x in range(length):
-                if grid[x][y] == 1:
-                    screen.blit(ghost_tet_table[tetrominoes.index(tet)],
-                                (32 * (coordinates[0] + x) + position[0], 32 * (coordinates[1] + y) + position[1]))
-    else:
-        for y in range(length):
-            for x in range(length):
-                if grid[x][y] == 1:
-                    screen.blit(tet_table[tetrominoes.index(tet)],
-                                (32 * (coordinates[0] + x) + position[0], 32 * (coordinates[1] + y) + position[1]))
+        if ghost:
+            for y in range(length):
+                for x in range(length):
+                    if grid[x][y] == 1:
+                            screen.blit(ghost_tet_table[tetrominoes.index(tet)],
+                                    (32 * (coordinates[0] + x) + position[0], 32 * (coordinates[1] + y) + position[1]))
+        else:
+            for y in range(length):
+                for x in range(length):
+                    if grid[x][y] == 1:
+                        screen.blit(tet_table[tetrominoes.index(tet)],
+                                    (32 * (coordinates[0] + x) + position[0], 32 * (coordinates[1] + y) + position[1]))
 
 
 def test_for_presses():
@@ -700,29 +704,28 @@ def first_non_zero(my_list):
     return None
 
 
-def game_intro():
-    pass
-    # screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
-    # screen.blit(helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
-    # pygame.display.flip()
-    # sleep(0.3)
-    # screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
-    # screen.blit(helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
-    # pygame.display.flip()
-    # sleep(0.3)
-    # screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+def game_intro():    
+    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+    screen.blit(helvetica_big.render('Ready', True, (150, 150, 150)), (32 * 6, 32 * 9))
+    sleep(0.3)
+    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
+    screen.blit(helvetica_big.render('Go', True, (150, 150, 150)), (32 * 6, 32 * 9))
+    pygame.display.flip()
+    sleep(0.3)
+    screen.fill((0, 0, 0), (32 * 6, 32 * 9, 32 * 4, 32 * 3))
 
 
 def blit_stats_constants():
-    screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
-    screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
+    if (display_flag):
+        screen.blit(helvetica_small.render("PPS:", False, (150, 150, 150)), (32 * 14, 0))
+        screen.blit(helvetica_small.render("Time:", False, (150, 150, 150)), (32 * 14, 44))
 
 def quit_game(score, time = None):
     agent.quit()
     pygame.quit()
-    sys.exit(score)
+    sys.exit(time)
 
-def play_game(grid = None, next_pieces = None):
+def play_game(grid = None, next_pieces = None):    
     screen.fill((0, 0, 0))
     pygame.display.flip()
 
@@ -755,7 +758,7 @@ def play_game(grid = None, next_pieces = None):
 
         # Pieces per second and time display
         if (frame - 1) % 30 == 0:
-            _time = time() - game_start_time
+            _time = time() - game_start_time            
             screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
             screen.blit(helvetica_small.render(str(round(_time, 2)), False, (150, 150, 150)), (32 * 14, 64))
 
@@ -770,9 +773,10 @@ def play_game(grid = None, next_pieces = None):
         sleep(max(0.0, 0.03333333333 - (time() - start)))
 
 
-def play_auto(grid = None, next_pieces = None):
-    screen.fill((0, 0, 0))
-    pygame.display.flip()
+def play_auto(grid = None, next_pieces = None, target_times = None):
+    if (display_flag):
+        screen.fill((0, 0, 0))
+        pygame.display.flip()
     frame = 0
     field = PlayField([32 * 2, 0], grid, next_pieces)
     field.new_piece()
@@ -781,7 +785,8 @@ def play_auto(grid = None, next_pieces = None):
     blit_stats_constants()
     game_start_time = time()
     seconds = 0
-    screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
+    if (display_flag):
+        screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
     while True:
         state = GameState(field)
         action = agent.get_action(state)
@@ -791,9 +796,10 @@ def play_auto(grid = None, next_pieces = None):
         agent.observe_transition(state, action, next_state, reward)
         _time = time() - game_start_time
         seconds += 1
-        screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
-        screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
-        pygame.display.flip()
+        if (display_flag):
+            screen.fill((0, 0, 0), (32 * 14, 64, 6 * 32, 20))
+            screen.blit(helvetica_small.render(str(seconds), False, (150, 150, 150)), (32 * 14, 64))
+            pygame.display.flip()
         pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -801,11 +807,16 @@ def play_auto(grid = None, next_pieces = None):
         if not result:
             field.record(field.total_score - death_penalty, seconds)
             quit_game(field.total_score - death_penalty, seconds)
+        if target_times != None:
+            if seconds == target_times:
+                field.record(field.total_score - death_penalty, seconds)
+                quit_game(field.total_score - death_penalty, seconds)
         # sleep(0.3)
 
 
 if __name__ == '__main__':
-    # os.environ["SDL_VIDEODRIVER"] = "dummy"
+    if not display_flag:
+        os.environ["SDL_VIDEODRIVER"] = "dummy"
     pygame.init()
     seed(a=None, version=2)
     helvetica_big = pygame.font.SysFont('Helvetica', 40)
@@ -854,4 +865,4 @@ if __name__ == '__main__':
     next_pieces = ['t', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't', 't']
 
     # play_game(grid, None)
-    play_auto(None, None)
+    play_auto(None, None, None if len(sys.argv) < 2 else int(sys.argv[1]))
