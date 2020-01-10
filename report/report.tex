@@ -270,6 +270,7 @@ Action表示了从一个State到另一个State的方式，在俄罗斯方块中�
     \item columnDifference: 相邻列的高度差之和
     \item rowEliminated: 当前块消除的行数
     \item tSpinStruct: tspin结构的数量
+    \item combo: 连击数
 \end{itemize}
 
 \subsection{矩阵匹配}
@@ -321,6 +322,31 @@ Action表示了从一个State到另一个State的方式，在俄罗斯方块中�
     \end{table}
 
 \begin{multicols}{2}
+
+根据以上两张表格，我们能注意到在同样次数的训练中，使用4阶评估函数的训练的AI，在同样的垃圾行测试环境下，能够维持更长的时间，消去更多的行数，获取更高的分数。同时，随着训练次数的提升，无论是1阶AI还是4阶AI都获得了更好的表现，这与算法预期效果一致。另外，我们将多层消除率、连击比率、和单位方块得分均进行了画图比较。可以注意到在训练的过程中，AI开始慢慢学会这些获取高分的方法，多层消除和连击率都在逐步提高。尽管在第一局到第50块之间的学习效果不稳定，往后这些比率随着训练次数的提升均在逐渐提高。其中，一阶AI在学习连击方面更加迅速，但在1000块的长时间训练下与四阶AI的表现无太大差异，在多层消除方面（指一次操作同时消去多行），可以看到四阶AI的表现明显优于一阶AI。对应地，四阶AI在得分效率方面也优于1阶AI。
+
+\end{multicols}
+
+\begin{Figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figure/result1.png}
+\end{Figure}
+
+\begin{Figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figure/result2.png}
+\end{Figure}
+
+\begin{Figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figure/result3.png}
+\end{Figure}
+
+
+\begin{multicols}{2}
+
+另外，在测试阶段，我们注意到没有一个AI在有意识地使用T-Spin操作获得高分，这可能是由于我们的评估函数中，仅有一个当前状态的T-Spin结构数量的Feature来鼓励AI使用T-Spin消除。而在真实的游戏环境中，绝大多数的T-spin消除都需要有意识地提前Hold一些T形方块，然后去构筑一些复杂的可以引起T-Spin的结构才能达成T-Spin消除。\\
+而我们的方法仅在评估函数测算了T-Spin结构而没有进行搜索帮助完成T-Spin消除，因此，即使AI根据这个Feature能够感受到T-Spin的结构，但是由于做出T-Spin消除的条件较为苛刻，它难以将这个T-Spin结构顺利化为额外的加分。所以并没能很好地训练该权重。我们估计，在加入搜索和有关T-Spin的更多Feature后可以较好地达到主动去做T-Spin的目标。
 
 \section{总结}
 
