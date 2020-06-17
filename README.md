@@ -1,20 +1,8 @@
-# Pytet
-Modern Tetris written in python 3.
+# 基于强化学习的现代俄罗斯方块AI
 
+我们使用 Approximate Q-Learning 算法训练 AI 挑战基于现代规则的俄罗斯方块，以击败大多数的人类玩家作为目的。
 
+将玩家（AI）可以获取到的所有关于游戏环境的信息，包括以二维数组表示的当前的游戏区域、当前的连击数量、分数、正在下落的方块、hold 的方块、未来的方块等信息视为 State，将游戏发出的方块放稳在游戏区域的某个位置这一操作视为 Action。同时我们使用线性权重方程和四阶多项式权重方程作为评估函数，并比较两者表现。
 
-z - rotate left
+我们通过随机发送垃圾块来模拟对战，在经过大量的训练后，我们的 AI 已经可以坚持极长的时间。我们接下来预计让我们的 AI 能预测更多的方块，能够有计划得做出更复杂的攻击行为。
 
-shift - hold
-
-x - rotate right
-
-down - soft drop
-
-left - move left
-
-space - hard drop
-
-right  - move right
-
-f5 - reset

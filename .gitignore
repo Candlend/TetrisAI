@@ -1,12 +1,10 @@
-misamino/tetris_ai/Release
-misamino/tetris_ai/tetris_ai.vcxproj
 *.pyc
 __pycache__/
 .vscode/
 test.py
-settings/weights.txt
 temp.txt
 settings/score.csv
 test.txt
 0.png
 1.png
+.idea/
